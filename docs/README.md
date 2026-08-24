@@ -10,6 +10,7 @@
 6. [Provider Clients and Prompt Templates](05-provider-clients-and-templates.md)
 7. [Configuration and startup](02-configuration-and-startup.md)
 8. [Native `/generate` Protocol](07-native-generate-protocol.md)
+9. [OpenAI Completions and Chat Completions](08-openai-completions.md)
 
 ## Cross-cutting references
 

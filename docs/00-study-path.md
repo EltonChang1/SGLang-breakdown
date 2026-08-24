@@ -95,6 +95,14 @@ shaping, disconnect detection, and explicit abort. Read it before the adapters:
 they eventually converge on much of this same runtime machinery but add their
 own schemas and compatibility behavior.
 
+The next subunit, [OpenAI Completions and Chat
+Completions](08-openai-completions.md), and its [file
+reference](reference/openai-completions.md), follows both OpenAI-compatible
+generation routes through shared error/timing policy, completion prompt
+mapping, chat message/template/media preparation, tool and reasoning
+constraints, native generation, logprobs, usage, extensions, and JSON/SSE
+response shaping.
+
 Questions to answer before continuing:
 
 - Why does `n > 1` become multiple independent request IDs rather than one
@@ -106,6 +114,11 @@ Questions to answer before continuing:
   admission for multimodal input?
 - What guarantees does an HTTP 200 from `/abort_request` provide—and what does
   it not prove?
+- Why can a field accepted by CompletionRequest still be behaviorally inert?
+- Which component owns chat framing, reasoning separation, tool-call parsing,
+  native request execution, and final OpenAI response shaping?
+- Why are prompt/cache/multimodal token counts strided by n while completion
+  and reasoning counts include every choice?
 
 ## Phase 4: scheduling and cache ownership
 

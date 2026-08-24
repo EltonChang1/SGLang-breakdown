@@ -108,6 +108,13 @@ detokenizer, IPC, and model-execution topology. "Offline" is a transport choice,
 not a promise of single-process execution. See
 [Offline Engine API](03-offline-engine.md).
 
+**OpenAI serving adapter.** A tokenizer-side compatibility layer that validates
+an OpenAI-shaped request, renders or maps it to `GenerateReqInput`, delegates
+to the shared native runtime, and reshapes native results as OpenAI JSON or
+SSE. It does not own scheduling or model execution, and accepting an official
+field does not prove the field has behavior. See [OpenAI Completions and Chat
+Completions](08-openai-completions.md).
+
 **Output-rank persistence (diffusion).** The default diffusion transport in
 which the worker output rank writes generated media and clears tensor/audio
 payloads before returning paths over ZMQ. It reduces serialization but means
@@ -187,6 +194,12 @@ both at once
 ([schemas](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/io_struct.py#L120-L167),
 [check](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/io_struct.py#L386-L395)).
 
+**SglExt.** The response-level `sglext` object used by the OpenAI adapters for
+requested SGLang-only routed-expert, cache-origin, and speculative-decoding
+details. It is omitted when empty; speculative details become one object for
+a single choice and a list for `n > 1`
+([schema](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/openai/protocol.py#L432-L449)).
+
 **SRT.** SGLang Runtime, implemented primarily under `python/sglang/srt`. It is
 the language-model serving runtime and includes much more than the scheduler:
 protocols, configuration, tokenization, caches, model execution, distributed
@@ -211,6 +224,13 @@ candidate can share or complete the prompt's final tokenization correctly. The
 frontend runtime choice path starts logprobs up to two prompt tokens back and
 removes an unchanged healed token before comparing candidates
 ([choice path](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/backend/runtime_endpoint.py#L257-L293)).
+
+**Tool-call constraint.** A structural-tag or JSON-schema generation
+constraint derived from chat tools and tool choice. Required/named calls use
+it to make parser input structurally reliable when a model-specific detector
+does not own a native format. It cannot be combined with another required
+output constraint because both cannot govern the same token stream
+([sampling rule](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/openai/protocol.py#L1142-L1173)).
 
 **TP / tensor parallelism.** Splitting tensor/model computation across ranks.
 The launcher maps local GPU IDs and spawns scheduler processes for TP/PP rank

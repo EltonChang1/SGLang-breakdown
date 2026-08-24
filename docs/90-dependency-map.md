@@ -165,6 +165,34 @@ scheduler, which makes its cancellation relationship distinct from ordinary
 `n == 1` requests. See [Native `/generate`
 Protocol](07-native-generate-protocol.md) for the full trace.
 
+## OpenAI completion dependency boundary
+
+The completion adapters wrap the native path with schema and response
+compatibility:
+
+```text
+CompletionRequest -> OpenAIServingCompletion -> GenerateReqInput
+ChatCompletionRequest -> message/template/tool preparation -> GenerateReqInput
+GenerateReqInput -> shared native runtime -> result records
+result records -> usage/logprob/reasoning/tool adapters -> OpenAI JSON or SSE
+```
+
+| Component | Depends on | Supplies |
+| --- | --- | --- |
+| FastAPI routes | Pydantic protocol records, JSON-content dependency, app-state handlers | typed completion/chat ingress |
+| `OpenAIServingBase` | raw Request, TokenizerManager, common error models | fixed validation/conversion/stream/error lifecycle |
+| completion adapter | prompt shape, completion template, sampling/format request | direct native generation request and text-completion choices |
+| chat message preparation | TemplateManager, tokenizer/Jinja or custom encoder, media formatter, tool schemas | prompt text/IDs, media, stops, grammar constraint, reasoning bit |
+| chat response preparation | reasoning and function-call parsers, native result metadata | content/reasoning/tool choices and semantic SSE deltas |
+| `UsageProcessor` | prompt-major flattened results and n | input counts once per prompt; output counts across choices |
+| OpenAI utilities | native logprob/extension/hidden-state records | wire-compatible optional response fields |
+
+Parser ownership is intentionally layered: rendering frames model input;
+reasoning parsing separates hidden and visible channels; function-call parsing
+extracts tools; the native runtime only executes the resulting generation
+request. See [OpenAI Completions and Chat
+Completions](08-openai-completions.md) for the complete flow.
+
 ## Configuration dependency
 
 Raw CLI/config values become `ServerArgs`; resolution derives a consistent

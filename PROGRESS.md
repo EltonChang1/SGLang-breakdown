@@ -32,7 +32,7 @@
 - Inventory: [`docs/coverage/inventory.csv`](docs/coverage/inventory.csv)
 - Policy and counts: [`docs/coverage/README.md`](docs/coverage/README.md)
 - Generator: [`scripts/build_coverage_inventory.py`](scripts/build_coverage_inventory.py)
-- Current statuses: 94 covered, 28 partial, 92 inventory-only, 8,105 pending.
+- Current statuses: 109 covered, 31 partial, 92 inventory-only, 8,087 pending.
 
 Every row includes a pinned source URL and category. Covered and partial rows
 link to their note. Inventory-only rows explain why line-by-line notes are not
@@ -40,73 +40,79 @@ useful. Pending rows state which future pass owns them.
 
 ## Completed in the latest run
 
-- Added [Native `/generate` Protocol](docs/07-native-generate-protocol.md) and
-  its [file reference](docs/reference/native-generate-protocol.md). They trace
-  `GenerateReqInput` normalization through sampling preparation,
-  tokenization/media processing, scheduler admission, token-ID output,
-  incremental detokenization, request-ID correlation, JSON/SSE shaping, and
-  cancellation.
-- Completed the request-header mapper, SRT `SamplingParams`, scheduler output
-  sender/streamer, and detokenizer files. Expanded explicit partial boundaries
-  for native HTTP, generation schemas, tokenizer manager, scheduler admission,
-  and `Req` state without claiming their unrelated management, cache, parser,
-  or execution responsibilities.
-- Documented request/result cardinality for batch and `n > 1`, cumulative
-  versus incremental streaming ownership, trusted-header precedence,
-  multimodal post-expansion length checks, prefix-matched explicit abort, and
-  the difference between dispatch success and abort acknowledgement.
-- Recorded two source-visible edge cases: prompt validation permits exactly
-  two of text/token IDs/embeddings and can mix text-derived cardinality with
-  token-ID execution despite its one-input error message; and
-  parallel sampling's normalized parent IDs do not have a clear one-to-one
-  relationship with generated choice IDs for state cleanup and HTTP abort.
-- Covered nine focused test files and partial slices of four mixed-purpose
-  suites. Recorded missing native HTTP coverage for both streaming modes,
-  in-band stream errors, actual client-close cancellation, and combined batch
-  plus parallel sampling.
-- Updated architecture/study navigation, dependency map, glossary, reference
-  indexes, coverage policy/counts, inventory, and ledger rows for the first
-  Phase 3 protocol subunit.
+- Added [OpenAI Completions and Chat
+  Completions](docs/08-openai-completions.md) and its [file
+  reference](docs/reference/openai-completions.md). They trace both FastAPI
+  routes through shared validation/error policy, request mapping or message
+  rendering, native generation, reasoning/tool parsing, usage/logprobs,
+  extensions, and JSON/SSE shaping.
+- Completed the empty OpenAI package marker, shared serving base, text
+  completion adapter, chat-encoding dispatcher, usage processor, response
+  utilities, and compact chat SSE builder. Added explicit partial boundaries
+  for the shared protocol schema and the model-specific branches of the large
+  chat adapter.
+- Documented completion prompt and response cardinality, echo, structured
+  output constraints, chat schema normalization, Jinja/conversation/custom
+  encoder selection, media extraction, assistant prefill, tool constraints,
+  reasoning ownership, semantic stream chunk order, and extension placement.
+- Recorded compatibility gaps that are visible in source: accepted completion
+  fields such as `best_of`, `suffix`, `user`, and `session_params` are not
+  consumed; body `custom_labels` is ignored in favor of the configured header;
+  and the upstream tutorial's per-choice `sgl_ext` claim conflicts with the
+  response-level `sglext` implementation.
+- Covered the three directly relevant user documentation/example files, the
+  complete completion unit suite, the LoRA parsing suite, two validation
+  suites, and the remaining OpenAI slice of request-length validation. Kept
+  broad protocol and chat unit files partial where later API or model-format
+  assertions remain.
+- Updated architecture/study navigation, dependency and terminology maps,
+  reference indexes, coverage policy/counts, inventory, and ledger rows for
+  the second Phase 3 protocol subunit.
 
 ## Validation in the latest run
 
 - Confirmed `.source/sglang` remained at the pinned commit with a clean worktree.
 - Rebuilt and checked the 8,319-row inventory; status totals match this file.
-- Checked 110 Markdown local links, all 122 ledger note targets, and 823 pinned
+- Checked 121 Markdown local links, all 140 ledger note targets, and 917 pinned
   source links, including local anchors, tracked source paths, and source line
   ranges.
-- Parsed 23 native-guide Python files and structurally checked five complete
-  runtime-file catalogs, native POST/PUT and abort routes, six transport
-  schemas, tokenizer/scheduler boundary methods, prompt-selection and
-  parallel-sampling/abort edge conditions, and focused-test assertion caveats.
-- Attempted five focused CPU/unit test files with the source package on
-  `PYTHONPATH`, but collection stopped before any test ran because the available
-  Python environment lacks `orjson` and `msgspec`.
+- Parsed 15 OpenAI-guide Python files and structurally checked the complete
+  base, completion, encoding-dispatch, usage, utility, and SSE catalogs;
+  request routes; accepted-but-inert versus forwarded fields; tool-constraint
+  and usage-stride claims; documentation drift; and focused test counts.
+- Attempted collection of the protocol, completion, chat, and LoRA unit suites
+  with the source package on `PYTHONPATH`, but no tests collected because the
+  environment lacks `orjson`; `msgspec` is also absent.
 - No GPU/model end-to-end suite was attempted because those tests require
   accelerator resources and model downloads; this run changes only study
   Markdown and ledger metadata.
 
 ## Next coherent study unit
 
-Continue Phase 3 with the OpenAI completions and chat-completions adapters.
-Trace their schemas, validation, chat-template/tool-parser preparation, usage
-and logprob conversion, streaming chunks, error/status compatibility, and
-convergence on `GenerateReqInput`. Then cover embeddings/scoring before the
-Anthropic, Ollama, gRPC, grammar/tool, and session protocol subunits.
+Continue Phase 3 with OpenAI embeddings, classification, score, rerank, and
+tokenize/detokenize adapters. Trace their schemas, template/token/media
+preparation, `EmbeddingReqInput` or generation fallback, pooled-result
+shaping, error/status behavior, tests, and user documentation. Then cover the
+Responses API before Anthropic, Ollama, gRPC, parser, and session subunits.
 
 ## Known gaps
 
-- Phase 1 public surfaces and the native `/generate` Phase 3 subunit are
-  complete. OpenAI and other protocol adapters remain the next gap.
+- Phase 1 public surfaces plus native generation and OpenAI completion/chat
+  Phase 3 subunits are complete at their generic adapter boundaries. Embedding,
+  Responses, and the remaining protocol adapters are the next gaps.
 - The shared frontend test-program file is partial outside the provider-reached
   functions, and no focused Anthropic, LiteLLM, or Vertex AI backend tests are
   present in the pinned snapshot.
 - Model- and backend-specific configuration handlers, declarative override
   providers, and runtime-context derived helpers remain assigned to their
   owning subsystem passes rather than being treated as complete here.
+- OpenAI protocol.py and serving_chat.py remain partial: non-completion schemas
+  plus DeepSeek-3.2/4, Kimi K3, Inkling, reasoning-family, and model-specific
+  tool-parser implementations retain dedicated passes. The broad chat unit
+  suite remains partial on the same boundary.
 - Request/control schemas and tokenizer/control manager files remain partial
-  outside the native/offline paths now explained; parser caches observability
-  multi-tokenizer elastic session-controller weight/cache and model-worker
+  outside the native/offline paths now explained; parser caches, observability,
+  multi-tokenizer, elastic, session-controller, weight/cache, and model-worker
   internals retain their later subsystem passes.
 - Diffusion CLI, launch, client, and output helpers are complete; sampling
   details, request/worker files outside the public slices, managers,

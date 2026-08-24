@@ -27,3 +27,6 @@ its exact status.
 - [Native `/generate`](native-generate-protocol.md): request normalization,
   sampling, tokenization and media preparation, scheduler admission messages,
   incremental detokenization, output correlation, streaming, and abort paths.
+- [OpenAI completions](openai-completions.md): completion/chat schemas, shared
+  adapter lifecycle, message rendering, native handoff, reasoning/tools, usage,
+  logprobs, streaming, extensions, documentation, examples, and focused tests.

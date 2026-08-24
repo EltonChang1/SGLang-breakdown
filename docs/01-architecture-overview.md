@@ -186,6 +186,16 @@ The [Native `/generate` Protocol](07-native-generate-protocol.md) expands this
 outline into the exact request cardinalities, messages, result shapes,
 sampling transformations, failure boundaries, and cancellation paths.
 
+OpenAI-compatible completions add a tokenizer-side adapter above step 1.
+Completion maps prompt/sampling fields directly; chat first renders messages,
+tools, reasoning flags, and media into prompt text or IDs. Both construct
+`GenerateReqInput`, reuse steps 2-5, then turn native results into
+OpenAI-compatible choices, usage, logprobs, extensions, and SSE records
+([completion conversion](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/openai/serving_completions.py#L68-L142),
+[chat conversion](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/openai/serving_chat.py#L965-L1097)).
+The full compatibility and parser boundary is in [OpenAI Completions and Chat
+Completions](08-openai-completions.md).
+
 ## Core invariants and failure boundaries
 
 - **A `ServerArgs` record is resolved once.** Re-entering non-idempotent
@@ -231,3 +241,5 @@ sampling transformations, failure boundaries, and cancellation paths.
   the Python server or adding native gRPC beside it.
 - Trace a frontend `sgl.gen` from the program thread through the executor
   worker and backend, then explain where that path first meets SRT.
+- Trace an OpenAI chat message to `GenerateReqInput`, then identify which
+  components turn model text back into reasoning, content, and tool calls.

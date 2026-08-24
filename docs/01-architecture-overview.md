@@ -48,6 +48,8 @@ The installed package exposes three broad ways in:
    same tokenizer/scheduler/detokenizer machinery but does not run the FastAPI
    surface. The class itself documents the shared three-component engine
    ([`Engine`, lines 209-221](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/engine.py#L209-L221)).
+   The complete Python API and control boundary is traced in
+   [Offline Engine API](03-offline-engine.md).
 
 The `sglang serve` command is a dispatcher, not just an alias for one server.
 It normalizes a positional model path, discovers installed serve backends,

@@ -25,8 +25,11 @@ material so similarly named packages are not conflated.
 Study the installed `sglang` package, the frontend language, the offline
 `Engine`, and the command-line entry points. The first reference note,
 [Serving entry points](reference/entrypoints.md), covers `sglang serve` and its
-backend extension contract. The frontend DSL, client backends, offline API, and
-diffusion `generate` command remain to be written.
+backend extension contract. The [Offline Engine API](03-offline-engine.md) and
+its [file reference](reference/offline-engine.md) now cover the in-process
+constructor, sync/async inference surfaces, request handoff, sessions, scoring,
+control methods, weight updates, and shutdown. The frontend DSL, client
+backends, and diffusion `generate` command remain to be written.
 
 Questions to answer before moving on:
 

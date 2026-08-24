@@ -246,11 +246,15 @@ FP8
 
 ## Startup symbols in large runtime files
 
-These files remain partial because later guides own their main APIs:
+This section records startup responsibilities in large runtime files. The
+engine file is now complete when combined with the offline-engine reference;
+the server and scheduler remain partial because later guides own their main
+APIs:
 
 - `entrypoints/engine.py`: `SchedulerInitResult`, scheduler/detokenizer launch,
   `_launch_subprocesses`, rank math, readiness polling, and `shutdown` are
-  covered
+  covered here; its public/control surface and remaining helpers are covered in
+  the [offline-engine reference](offline-engine.md#offline-engine-implementation)
   ([launch](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/engine.py#L818-L1269),
   [readiness and rank math](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/engine.py#L1773-L1864)).
 - `entrypoints/http_server.py`: health gating, ASGI lifespan cleanup, general

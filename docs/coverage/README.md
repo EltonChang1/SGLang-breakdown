@@ -24,11 +24,12 @@ The initial inventory contains 8,319 unique tracked paths:
 | Asset | 4 |
 | Generated | 2 |
 
-After the configuration/startup pass, 16 paths are `covered`, 14 are `partial`,
-92 are justified `inventory-only`, and 8,197 remain `pending`. Small CLI,
-config-merging, argument-metadata, and in-tree platform files have complete
-references. Large policy and runtime files remain partial; a link to one
-symbol must not be mistaken for complete file coverage.
+After the offline-engine pass, 20 paths are `covered`, 15 are `partial`, 92 are
+justified `inventory-only`, and 8,192 remain `pending`. Small CLI,
+config-merging, argument-metadata, in-tree platform, offline-engine adapter,
+and scoring files have complete references. Large shared schema, tokenizer,
+control, policy, and runtime files remain partial; a link to one symbol must
+not be mistaken for complete file coverage.
 
 ## Status meanings
 

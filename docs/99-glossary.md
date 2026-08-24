@@ -12,6 +12,13 @@ the runtime. Always name the kind.
 arrives and existing requests finish, rather than holding a static batch for
 its whole lifetime. The detailed scheduler policy is not covered yet.
 
+**Control plane.** Operations that inspect or mutate the live runtime rather
+than submit ordinary inference: cache/memory controls, profiling, sessions,
+weight or LoRA updates, state readback, and collective RPC. Offline-engine
+methods usually delegate these to tokenizer-side typed communicators so rank
+fan-out and result merging have one owner
+([engine controls](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/engine.py#L1278-L1629)).
+
 **Config bag.** A process-local, read-only namespace projected from resolved
 `ServerArgs` fields at publication, such as `get_exec()` or `get_schedule()`.
 It is the runtime source of truth; sanctioned post-publication overrides update
@@ -49,6 +56,12 @@ distributed modes derive TCP addresses
 already processed tokens. It enables reuse and incremental decoding. Ownership,
 allocation, and eviction receive a dedicated later guide.
 
+**Offline Engine.** The in-process `sglang.Engine` Python API. It avoids an
+HTTP/gRPC request boundary but still launches the shared tokenizer, scheduler,
+detokenizer, IPC, and model-execution topology. "Offline" is a transport choice,
+not a promise of single-process execution. See
+[Offline Engine API](03-offline-engine.md).
+
 **PP / pipeline parallelism.** Splitting model stages across ranks. The launcher
 creates scheduler processes over PP and TP rank ranges; pipeline mode selects
 special scheduler loops and imposes compatibility constraints.
@@ -67,6 +80,13 @@ pipeline: defaults, compatibility choices, model/hardware policy, and
 validations have been applied and the record is read-only. It is distinct from
 raw CLI/YAML input and from later runtime bag overrides.
 
+**RID / request ID.** The correlation key joining tokenizer-side request
+state, scheduler/detokenizer output, and the result's `meta_info.id`. Missing
+IDs are generated during normalization; IDs within a batch and IDs already in
+flight must be unique
+([normalization](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/io_struct.py#L345-L395),
+[state guard](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/tokenizer_manager.py#L3358-L3395)).
+
 **RadixAttention.** SGLang's prefix-sharing approach built around a radix-tree
 view of reusable KV-backed token prefixes. This is an architectural term here;
 the exact cache-node and allocator invariants remain pending.
@@ -80,6 +100,14 @@ processes for parallel ranks.
 has constructed the model runtime and can report token limits and startup
 timings. It proves model-process initialization, but not yet a successful
 request through the public HTTP path.
+
+**Session parameters.** The scheduler conversation-history selector carried
+as `session_params`: an opened session ID plus optional prior request ID,
+replacement, token offset, or previous-output policy. It is distinct from the
+separate `session_id` identity field, and request normalization rejects using
+both at once
+([schemas](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/io_struct.py#L120-L167),
+[check](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/io_struct.py#L386-L395)).
 
 **SRT.** SGLang Runtime, implemented primarily under `python/sglang/srt`. It is
 the language-model serving runtime and includes much more than the scheduler:

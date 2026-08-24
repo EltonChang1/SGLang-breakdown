@@ -226,8 +226,12 @@ surfaces are not yet covered.
 
 ## `python/sglang/srt/entrypoints/engine.py`
 
-**Covered symbols:** `init_tokenizer_manager`, `Engine.__init__`, scheduler and
-detokenizer launch helpers, `_launch_subprocesses`, and `shutdown`.
+**Status: covered.** The constructor, sync/async inference APIs, encoding,
+reranking, scoring mixin, sessions, control/RPC methods, weight and LoRA
+updates, process launch, environment setup, rank math, readiness, and shutdown
+are now covered across this entry-point note, the
+[configuration/startup reference](configuration-startup.md#startup-symbols-in-large-runtime-files),
+and the dedicated [offline-engine reference](offline-engine.md#offline-engine-implementation).
 
 The offline `Engine` and HTTP launcher share `_launch_subprocesses`, which is a
 key anti-duplication boundary. The helper resolves and validates configuration,
@@ -249,13 +253,17 @@ transport
 ([lines 265-296](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/engine.py#L265-L296),
 [lines 1239-1269](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/engine.py#L1239-L1269)).
 
-**Remaining work.** Synchronous and asynchronous offline APIs, sessions,
-control/RPC methods, weight updates, Ray subclassing, elastic modes, and rank
-math need later notes.
+The important design boundary is now explicit: public methods construct shared
+request/control records and delegate validation, locking, fan-out, and response
+correlation to the tokenizer side. Ray-specific actor placement is implemented
+in its own module and remains assigned to the distributed execution pass; it
+does not make this file incomplete.
 
 ## `python/sglang/srt/managers/tokenizer_manager.py`
 
-**Covered symbol:** the single-request branch of `generate_request`.
+**Covered symbols:** single and batch `generate_request` flow, engine-facing
+request state and response shapes, disk-update locking/readback, and GC
+dispatch.
 
 The manager owns request normalization, request-ID state, input tokenization and
 multimodal preprocessing, request dispatch, client cancellation, and response
@@ -269,9 +277,13 @@ normal scheduler-response path or discarded on pre-dispatch failure. Input and
 requested output length are validated against model context before scheduling
 ([lines 1159-1209](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/tokenizer_manager.py#L1159-L1209)).
 
-**Remaining work.** Batch and parallel sampling, media processing, grammar and
-parser setup, output reconstruction, cancellation races, metrics, management
-RPCs, weight updates, and multi-tokenizer routing remain.
+The [offline-engine reference](offline-engine.md#tokenizer-side-boundaries)
+adds batch aggregation/interleaving, pre-dispatch cleanup, embedding-override
+validation, disk-update locking, config readback, and public response shapes.
+
+**Remaining work.** Media/cache implementations, grammar and parser setup,
+full output/logprob reconstruction, cancellation races, metrics,
+multi-tokenizer and elastic routing, and protocol-only paths remain.
 
 ## `python/sglang/srt/managers/scheduler.py`
 

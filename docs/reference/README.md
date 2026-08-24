@@ -11,3 +11,6 @@ its exact status.
 - [Configuration and startup](configuration-startup.md): CLI/YAML schema,
   one-time resolution and declarations, runtime publication, platform files,
   rank/port construction, readiness, warmup, and shutdown symbols.
+- [Offline Engine](offline-engine.md): base contract, constructor and event-loop
+  boundary, generation/embedding/scoring adapters, sessions, runtime controls,
+  weight updates, LoRA, request schemas, and tokenizer-side fan-out.

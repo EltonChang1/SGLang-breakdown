@@ -32,7 +32,7 @@
 - Inventory: [`docs/coverage/inventory.csv`](docs/coverage/inventory.csv)
 - Policy and counts: [`docs/coverage/README.md`](docs/coverage/README.md)
 - Generator: [`scripts/build_coverage_inventory.py`](scripts/build_coverage_inventory.py)
-- Current statuses: 16 covered, 14 partial, 92 inventory-only, 8,197 pending.
+- Current statuses: 20 covered, 15 partial, 92 inventory-only, 8,192 pending.
 
 Every row includes a pinned source URL and category. Covered and partial rows
 link to their note. Inventory-only rows explain why line-by-line notes are not
@@ -40,53 +40,57 @@ useful. Pending rows state which future pass owns them.
 
 ## Completed in the latest run
 
-- Added a teaching-oriented [configuration and startup guide](docs/02-configuration-and-startup.md)
-  covering the CLI/YAML schema, precedence, the raw-to-resolved declaration
-  pipeline, platform selection, runtime namespace publication and overrides,
-  configured versus live parallel state, rank/port construction, readiness,
-  warmup, health gating, and shutdown.
-- Added the companion [file and symbol reference](docs/reference/configuration-startup.md).
-  It completes the config merger, argument metadata/actions, empty package
-  marker, and all in-tree platform files; `server_args.py`, `overrides.py`, and
-  `runtime_context.py` remain explicitly partial where later model/cache/kernel
-  guides own the details.
-- Deepened the startup trace in `engine.py`, `http_server.py`, and
-  `scheduler.py`: scheduler pipe readiness is now clearly separated from
-  public readiness after a real warmup request, with failure and cleanup owners
-  named.
-- Updated the study path, documentation/reference indexes, dependency map,
-  glossary, and all affected coverage rows.
+- Added a teaching-oriented [Offline Engine API](docs/03-offline-engine.md)
+  covering the in-process-versus-single-process distinction, constructor and
+  event-loop lifecycle, sync/async and single/batch/streaming return shapes,
+  request normalization/correlation, DP routing, output records, encoding,
+  reranking, scoring, sessions, controls, weights, LoRA, RPC, and shutdown.
+- Added the companion [file and symbol reference](docs/reference/offline-engine.md).
+  It completes `EngineBase.py`, `engine.py`, `engine_score_mixin.py`, and
+  `tokenizer_manager_score_mixin.py`; it adds explicit partial boundaries for
+  engine-used `io_struct.py` and `tokenizer_control_mixin.py` responsibilities
+  and deepens the existing `tokenizer_manager.py` trace.
+- Documented non-obvious safety rules: sync methods cannot drive an already
+  running loop, spawned scripts need a main guard, batch streams are
+  completion-interleaved and indexed, scheduler session history uses
+  `session_params` rather than the distinct `session_id`, weight mutations use
+  the model writer lock and require cache invalidation, and LoRA result objects
+  must be checked for success.
+- Updated the architecture overview, study path, documentation/reference
+  indexes, dependency map, glossary, coverage policy/counts, and every affected
+  coverage row.
 
 ## Validation in the latest run
 
 - Confirmed `.source/sglang` remained at the pinned commit with a clean worktree.
 - Rebuilt and checked the 8,319-row inventory; status totals match this file.
-- Validated local Markdown targets and note anchors, and verified pinned source
-  paths and line ranges for every guide.
-- A dependency-light `ConfigArgumentMerger` smoke test passed for CLI
-  precedence and YAML boolean/list/dict conversion.
-- `git diff --check` passed.
-- Targeted upstream config/platform/runtime-context tests could not collect in
-  this lightweight environment because `orjson` is not installed; no source
-  assertion ran. Interpreter/pytest caches from the attempt were removed so
-  the source checkout remained unchanged.
+- Validated all local Markdown targets and note anchors, every coverage-note
+  anchor, and pinned source paths and line ranges across all guides.
+- An AST-based adapter parity check confirmed sync and async generation map the
+  same 30 request fields and sync/async embedding map the same 10 fields.
+- `git diff --check` passed. No model/device runtime test was attempted because
+  this run changes only study Markdown and ledger metadata.
 
 ## Next coherent study unit
 
-Finish the remaining Phase 1 public surface with the offline `Engine`:
-constructor normalization, sync/async generation and embedding APIs, sessions,
-control/RPC methods, weight updates, and shutdown/context-manager semantics.
-Relate each public method to the shared tokenizer/scheduler runtime without
-entering scheduler policy, then update the `engine.py` ledger boundary before
-moving to frontend language execution and protocol adapters.
+Continue Phase 1 with the frontend language execution core: trace `@function`
+and `SglFunction` construction through IR expressions, `ProgramState` and
+`StreamExecutor`, sync/batch/stream execution, choice evaluation, the
+`BaseBackend` contract, and the first handoff through `RuntimeEndpoint`. Cover
+`lang/api.py`, `ir.py`, `interpreter.py`, `global_config.py`, `choices.py`,
+`backend/base_backend.py`, and the relevant `backend/runtime_endpoint.py`
+boundary before surveying provider-specific client adapters.
 
 ## Known gaps
 
-- Frontend language, offline engine APIs, diffusion CLI, and protocol-specific
-  serving adapters are not yet covered.
+- Frontend language, provider client backends, diffusion CLI, and
+  protocol-specific serving adapters are not yet covered.
 - Model- and backend-specific configuration handlers, declarative override
   providers, and runtime-context derived helpers remain assigned to their
   owning subsystem passes rather than being treated as complete here.
+- Request/control schemas and tokenizer/control manager files remain partial
+  outside the methods exercised by the offline API; session-controller and
+  weight/cache/model-worker internals retain their later subsystem passes.
 - Scheduler admission/batching, radix/KV caches, model execution, model/layer
   families, kernels, distributed/advanced modes, and diffusion internals remain.
 - Rust crates, gateway, router, tests, benchmarks, examples, docs, packaging,

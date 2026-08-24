@@ -22,6 +22,30 @@ The default startup path linking these layers is source-visible in
 [`launch_server`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/http_server.py#L2767-L2828)
 and [`Engine._launch_subprocesses`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/engine.py#L1022-L1237).
 
+## Offline Engine dependency boundary
+
+The offline API removes the network protocol adapter but preserves the shared
+runtime below it. Its method groups have distinct immediate dependencies:
+
+| Public operation | Immediate dependency | Supplies |
+| --- | --- | --- |
+| `generate` / `async_generate` | `GenerateReqInput`, tokenizer-manager request state, stored/current asyncio loop | One or batched result records, optionally streamed |
+| `encode` / `rerank` | `EmbeddingReqInput`, tokenizer/media preprocessing | Embeddings or cross-encoder pooled outputs |
+| `score` / `async_score` | engine score mixin, tokenizer score mixin, generation or embedding request | `ScoreResult` with label/class scores |
+| sessions | open/close schemas, tokenizer control mixin, scheduler session controller | Multi-turn context identity and lifetime |
+| weight/LoRA controls | typed schemas, model-update/LoRA locks, rank communicators | Merged mutation results and live model metadata |
+| cache/memory/profile controls | tokenizer control mixin and scheduler fan-out | Runtime state transitions and typed status |
+| `collective_rpc` | root-only ZMQ DEALER socket and scheduler RPC dispatcher | Blocking all-rank method execution |
+| shutdown | watchdog, RPC socket, daemon/process tree, tokenizer transports | Released process and accelerator ownership |
+
+Request data flows down through typed request objects; results flow up through
+request-ID-correlated tokenizer state. Model mutations take the writer side of
+the same lock whose reader side protects preprocessing/dispatch. Direct
+collective RPC is the exception: it bypasses tokenizer-manager communicators
+and is therefore a sharper root-only interface. See
+[Offline Engine API](03-offline-engine.md) for the ordered traces and failure
+boundaries.
+
 ## Native and external boundaries
 
 - The Python build reads the [`rust` Cargo workspace](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/rust/Cargo.toml#L1-L31)

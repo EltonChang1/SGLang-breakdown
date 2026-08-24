@@ -25,8 +25,10 @@ labeled, but are not expanded line by line.
 
 - [Architecture overview](docs/01-architecture-overview.md)
 - [Configuration and startup](docs/02-configuration-and-startup.md)
+- [Offline Engine API](docs/03-offline-engine.md)
 - [Serving entry-point reference](docs/reference/entrypoints.md)
 - [Configuration/startup file reference](docs/reference/configuration-startup.md)
+- [Offline Engine file reference](docs/reference/offline-engine.md)
 - [Dependency map](docs/90-dependency-map.md)
 - [Glossary](docs/99-glossary.md)
 - [All 8,319 tracked paths in the coverage ledger](docs/coverage/inventory.csv)

@@ -1,0 +1,19 @@
+path,status,note_path,reason
+README.md,partial,docs/01-architecture-overview.md#what-is-in-this-snapshot,Product-level orientation is covered; documentation-specific claims remain for the documentation pass.
+python/pyproject.toml,partial,docs/reference/entrypoints.md#pythonpyprojecttoml,Entry points and Rust-extension packaging are covered; the full dependency and platform packaging matrix remains pending.
+python/setup.py,partial,docs/reference/entrypoints.md#pythonsetuppy,Rust extension discovery and filtering are covered; remaining build failure cases await the packaging guide.
+python/sglang/__init__.py,covered,docs/reference/entrypoints.md#pythonsglang__init__py,Public exports and import-time side effects are explained.
+python/sglang/cli/main.py,covered,docs/reference/entrypoints.md#pythonsglangclimainpy,The complete top-level CLI dispatcher is explained.
+python/sglang/cli/serve.py,covered,docs/reference/entrypoints.md#pythonsglangcliservepy,The complete serve-backend selection and cleanup path is explained.
+python/sglang/cli/serve_backends.py,covered,docs/reference/entrypoints.md#pythonsglangcliserve_backendspy,The backend extension contract discovery validation and fallback behavior are explained.
+python/sglang/launch_server.py,covered,docs/reference/entrypoints.md#pythonsglanglaunch_serverpy,All launch-mode branches and module-entry cleanup behavior are explained.
+python/sglang/srt/server_args.py,partial,docs/reference/entrypoints.md#pythonsglangsrtserver_argspy,The role of ServerArgs and one-time resolution is covered; individual argument groups and invariants remain pending.
+python/sglang/srt/runtime_context.py,partial,docs/01-architecture-overview.md#startup-and-process-topology,Configuration publication across runtime roles is introduced; the full context API remains pending.
+python/sglang/srt/entrypoints/http_server.py,partial,docs/reference/entrypoints.md#pythonsglangsrtentrypointshttp_serverpy,Launch lifespan and native generate endpoint symbols are traced; the complete API surface remains pending.
+python/sglang/srt/entrypoints/engine.py,partial,docs/reference/entrypoints.md#pythonsglangsrtentrypointsenginepy,Engine construction process launch readiness and shutdown are traced; offline APIs and advanced launch modes remain pending.
+python/sglang/srt/managers/tokenizer_manager.py,partial,docs/reference/entrypoints.md#pythonsglangsrtmanagerstokenizer_managerpy,The single-request normalize tokenize dispatch wait and cleanup path is traced; the remaining control APIs and batch variants remain pending.
+python/sglang/srt/managers/scheduler.py,partial,docs/reference/entrypoints.md#pythonsglangsrtmanagersschedulerpy,Scheduler process setup and event-loop selection are introduced; scheduling policy and batch execution remain pending.
+python/sglang/srt/managers/detokenizer_manager.py,partial,docs/reference/entrypoints.md#pythonsglangsrtmanagersdetokenizer_managerpy,The detokenizer subprocess lifecycle and placement in the response path are covered; detokenization state handling remains pending.
+rust/Cargo.toml,partial,docs/01-architecture-overview.md#what-is-in-this-snapshot,Workspace membership and Python-extension role are covered; individual crates remain pending.
+sgl-model-gateway/Cargo.toml,partial,docs/01-architecture-overview.md#what-is-in-this-snapshot,The gateway's architectural role and binary/library surfaces are introduced; its modules and protocols remain pending.
+experimental/sgl-router/Cargo.toml,partial,docs/01-architecture-overview.md#what-is-in-this-snapshot,The KV-aware router's architectural role is introduced; policies protocols and worker discovery remain pending.

@@ -10,11 +10,21 @@ deployment, and examples.
 
 ## How to study this repository
 
-1. Start with `docs/00-study-path.md` when it exists.
+1. Start with [`docs/00-study-path.md`](docs/00-study-path.md).
 2. Read the numbered architecture and subsystem guides in order.
-3. Use `docs/reference/` for file-by-file and symbol-level explanations.
-4. Check `PROGRESS.md` for coverage and the exact SGLang commit analyzed.
+3. Use [`docs/reference/`](docs/reference/README.md) for file-by-file and
+   symbol-level explanations.
+4. Check [`PROGRESS.md`](PROGRESS.md) and the
+   [coverage inventory](docs/coverage/README.md) before assuming a file is
+   complete.
 
 Generated, vendored, binary, cache, and build-output files are inventoried and
 labeled, but are not expanded line by line.
 
+## Available now
+
+- [Architecture overview](docs/01-architecture-overview.md)
+- [Serving entry-point reference](docs/reference/entrypoints.md)
+- [Dependency map](docs/90-dependency-map.md)
+- [Glossary](docs/99-glossary.md)
+- [All 8,319 tracked paths in the coverage ledger](docs/coverage/inventory.csv)

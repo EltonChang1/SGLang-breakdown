@@ -24,3 +24,6 @@ its exact status.
   dispatchers, server/sampling precedence, `DiffGenerator`, worker topology,
   scheduler clients, output materialization/persistence, cleanup, and focused
   unit/GPU tests.
+- [Native `/generate`](native-generate-protocol.md): request normalization,
+  sampling, tokenization and media preparation, scheduler admission messages,
+  incremental detokenization, output correlation, streaming, and abort paths.

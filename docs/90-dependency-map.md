@@ -136,6 +136,35 @@ boundaries.
   distributed execution, and optional dependency group. Its reuse of shared
   package utilities does not make it a mode inside the SRT scheduler.
 
+## Native generate dependency boundary
+
+The native protocol crosses process-ownership boundaries and three typed
+message changes before client-visible text returns:
+
+```text
+GenerateReqInput -> TokenizerManager -> TokenizedGenerateReqInput
+                 -> Scheduler/Req -> BatchTokenIDOutput
+                 -> DetokenizerManager -> BatchStrOutput
+                 -> ReqState -> JSON or SSE
+```
+
+| Boundary | Depends on | Supplies |
+| --- | --- | --- |
+| HTTP handler | FastAPI body conversion, trusted request headers | native request object and JSON/SSE response policy |
+| `GenerateReqInput.normalize_batch_and_arguments` | prompt/media cardinality, sampling dictionaries, IDs | normalized single/batch objects with request IDs and cardinality |
+| tokenizer preparation | tokenizer or supplied IDs/embeddings, media processor, server sampling defaults | verified `SamplingParams` and tokenized transport request |
+| scheduler admission | mutable `Req`, grammar manager, session/cache state, model limits | queued execution work or correlated error output |
+| scheduler output streamer | request finish state, stream interval, unsent offsets | token/logprob/custom-data suffix batches |
+| detokenizer | tokenizer, bounded decode state, stop trimming | printable text deltas preserving request IDs |
+| tokenizer result loop | `ReqState`, request ID, output-mode configuration | cumulative or incremental client result records |
+
+Abort messages travel tokenizer-to-scheduler and use request-ID prefix
+matching; successful dispatch is not an acknowledgement that active work was
+found or stopped. Parallel sampling creates fresh choice IDs above the
+scheduler, which makes its cancellation relationship distinct from ordinary
+`n == 1` requests. See [Native `/generate`
+Protocol](07-native-generate-protocol.md) for the full trace.
+
 ## Configuration dependency
 
 Raw CLI/config values become `ServerArgs`; resolution derives a consistent
@@ -165,7 +194,6 @@ The full dependency order and mutation boundaries are explained in
 
 ## Questions for later passes
 
-- Which request/output message types cross each ZMQ channel?
 - Which cache owns token slots, KV tensors, radix nodes, host storage, and
   external/disaggregated copies?
 - Which model/layer abstractions are stable extension points versus

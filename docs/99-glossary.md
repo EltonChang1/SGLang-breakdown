@@ -53,9 +53,11 @@ dtype
 ([enum](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/multimodal_gen/configs/sample/sampling_params.py#L81-L95)).
 
 **DetokenizerManager.** The process-side component that turns scheduler token
-outputs into incremental or final text and returns them to tokenizer-side
-request state. Its process entry is
-[`run_detokenizer_process`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/detokenizer_manager.py#L516-L539).
+outputs into text deltas and returns them to tokenizer-side request state. It
+keeps bounded decoding context so subword boundaries remain correct while old
+token history can be discarded; cumulative versus incremental client output
+is decided later by `TokenizerManager`. See [Native `/generate`
+Protocol](07-native-generate-protocol.md#correlation-batching-and-streaming-shapes).
 
 **DiffGenerator.** The public synchronous Python client for the separate
 `sglang.multimodal_gen` runtime. Local mode launches diffusion workers without
@@ -136,6 +138,14 @@ pipeline: defaults, compatibility choices, model/hardware policy, and
 validations have been applied and the record is read-only. It is distinct from
 raw CLI/YAML input and from later runtime bag overrides.
 
+**SamplingParams (SRT).** The scheduler-facing generation policy created after
+request values override server-preferred defaults. It owns token budget,
+penalties, sampling filters, stops, grammar constraints, seed, stream interval,
+and verification. Normalization converts near-zero temperature to greedy
+`top_k=1` behavior and tokenizer-dependent normalization expands text stops
+([implementation](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/sampling/sampling_params.py#L38-L332)). It is unrelated to the
+diffusion runtime's class of the same name.
+
 **RID / request ID.** The correlation key joining tokenizer-side request
 state, scheduler/detokenizer output, and the result's `meta_info.id`. Missing
 IDs are generated during normalization; IDs within a batch and IDs already in
@@ -182,10 +192,19 @@ the language-model serving runtime and includes much more than the scheduler:
 protocols, configuration, tokenization, caches, model execution, distributed
 modes, and operations.
 
+**SSE / server-sent events.** The native streaming response format: each
+result is encoded as `data: <json>` followed by a blank line, and ordinary
+completion ends with `data: [DONE]`. This snapshot can surface a streaming
+`ValueError` as an in-band JSON error event; client disconnect ends the stream
+without the sentinel. See [the native stream
+contract](07-native-generate-protocol.md#correlation-batching-and-streaming-shapes).
+
 **TokenizerManager.** The tokenizer-side coordinator in the main process for
 the common HTTP/offline topology. It owns request normalization/state,
 tokenization and media preparation, scheduler dispatch, cancellation, and
 response correlation.
+Default streaming accumulates detokenizer deltas into the full prefix; the
+`--incremental-streaming-output` mode instead exposes new suffixes only.
 
 **Token healing.** Re-evaluating a small suffix of an existing prompt so a
 candidate can share or complete the prompt's final tokenization correctly. The

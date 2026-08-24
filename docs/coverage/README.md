@@ -24,13 +24,14 @@ The initial inventory contains 8,319 unique tracked paths:
 | Asset | 4 |
 | Generated | 2 |
 
-After the diffusion-generate pass, 80 paths are `covered`, 24 are `partial`, 92
-are justified `inventory-only`, and 8,123 remain `pending`. Small CLI,
+After the native-generate pass, 94 paths are `covered`, 28 are `partial`, 92
+are justified `inventory-only`, and 8,105 remain `pending`. Small CLI,
 config-merging, argument-metadata, in-tree platform, offline-engine adapter,
 scoring, frontend IR/interpreter, tracing, choice-policy, SRT frontend HTTP
 adapter, provider backend/template/example, diffusion generate/launch/client,
-output-helper, and focused test files have complete references. Large shared
-schema, tokenizer, control, policy, sampling, worker, pipeline-request,
+output-helper, native sampling, request-header, output-streaming,
+detokenization, and focused test files have complete references. Large shared
+schema, tokenizer, scheduler, control, policy, worker, pipeline-request,
 runtime, and mixed-purpose test files remain partial; a link to one symbol must
 not be mistaken for complete file coverage.
 

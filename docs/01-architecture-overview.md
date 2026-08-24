@@ -163,24 +163,28 @@ default runtime:
    before normal output removes request state, it explicitly discards the
    pending entries
    ([`generate_request`, lines 767-833](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/tokenizer_manager.py#L767-L833)).
-3. The scheduler subprocess constructs `Scheduler`, returns initialization
-   information to its parent, and blocks in a selected event loop
-   ([`run_scheduler_process`, lines 5145-5212](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/scheduler.py#L5145-L5212)).
-   Normal, overlapped, pipeline-parallel, and disaggregated modes select
-   different loops rather than one loop full of every condition
-   ([`dispatch_event_loop`, lines 5050-5077](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/scheduler.py#L5050-L5077)).
-4. For text generation, output tokens pass through the detokenizer process,
-   which either runs its ordinary loop or a multi-HTTP-worker loop
-   ([`run_detokenizer_process`, lines 516-539](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/detokenizer_manager.py#L516-L539)).
-5. The tokenizer manager correlates returned output with request state, yields
-   streaming chunks or the final object, records completion metrics, and aborts
-   work when a client disconnect makes the result unwanted. The detailed batch
-   output transformation is intentionally left for the request-lifecycle guide.
+3. The scheduler turns `TokenizedGenerateReqInput` into mutable `Req` state,
+   validates scheduler-visible limits, and admits ordinary work to a waiting
+   queue or grammar-bearing work to asynchronous grammar preparation
+   ([`handle_generate_request`, lines 2419-2729](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/scheduler.py#L2419-L2729)).
+4. The output streamer emits only unsent token and metadata suffixes as
+   `BatchTokenIDOutput`. The detokenizer keeps bounded per-request decode state
+   and returns printable `BatchStrOutput` deltas
+   ([output payload](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/scheduler_components/output_streamer.py#L655-L729),
+   [incremental decode](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/detokenizer_manager.py#L291-L410)).
+5. The tokenizer manager correlates output by request ID, accumulates default
+   cumulative results or exposes incremental deltas, records metrics, wakes
+   request waiters, and dispatches aborts when a client disconnects
+   ([result loop](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/tokenizer_manager.py#L2153-L2461)).
 
 The important architectural fact is ownership: HTTP protocol objects and
 client connections live on the tokenizer side; accelerator batching and model
 execution live in scheduler processes; detokenization is isolated so decoding
 text cannot stall accelerator scheduling.
+
+The [Native `/generate` Protocol](07-native-generate-protocol.md) expands this
+outline into the exact request cardinalities, messages, result shapes,
+sampling transformations, failure boundaries, and cancellation paths.
 
 ## Core invariants and failure boundaries
 

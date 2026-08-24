@@ -86,6 +86,27 @@ scoring requests into their shared request structures. Then cover chat
 templates, tokenization, multimodal preprocessing, grammar/tool parsers,
 sessions, request state, cancellation, and streaming response contracts.
 
+The first protocol subunit is available in [Native `/generate`
+Protocol](07-native-generate-protocol.md), with a companion [file and symbol
+reference](reference/native-generate-protocol.md). It traces request shape and
+normalization through sampling preparation, tokenizer/media work, scheduler
+admission messages, incremental detokenization, correlation, SSE/non-streaming
+shaping, disconnect detection, and explicit abort. Read it before the adapters:
+they eventually converge on much of this same runtime machinery but add their
+own schemas and compatibility behavior.
+
+Questions to answer before continuing:
+
+- Why does `n > 1` become multiple independent request IDs rather than one
+  scheduler request with multiple choices?
+- Where do token deltas become cumulative text in the default streaming mode?
+- Which process owns client disconnect detection, scheduler abort matching,
+  and detokenization state?
+- Why can prompt length pass tokenizer-side validation and fail at scheduler
+  admission for multimodal input?
+- What guarantees does an HTTP 200 from `/abort_request` provide—and what does
+  it not prove?
+
 ## Phase 4: scheduling and cache ownership
 
 Study the scheduler's queues and batch types before its individual policies.

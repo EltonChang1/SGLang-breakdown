@@ -9,6 +9,7 @@
 5. [Frontend Language Execution](04-frontend-language.md)
 6. [Provider Clients and Prompt Templates](05-provider-clients-and-templates.md)
 7. [Configuration and startup](02-configuration-and-startup.md)
+8. [Native `/generate` Protocol](07-native-generate-protocol.md)
 
 ## Cross-cutting references
 

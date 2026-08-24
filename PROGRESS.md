@@ -32,7 +32,7 @@
 - Inventory: [`docs/coverage/inventory.csv`](docs/coverage/inventory.csv)
 - Policy and counts: [`docs/coverage/README.md`](docs/coverage/README.md)
 - Generator: [`scripts/build_coverage_inventory.py`](scripts/build_coverage_inventory.py)
-- Current statuses: 80 covered, 24 partial, 92 inventory-only, 8,123 pending.
+- Current statuses: 94 covered, 28 partial, 92 inventory-only, 8,105 pending.
 
 Every row includes a pinned source URL and category. Covered and partial rows
 link to their note. Inventory-only rows explain why line-by-line notes are not
@@ -40,62 +40,64 @@ useful. Pending rows state which future pass owns them.
 
 ## Completed in the latest run
 
-- Added [Diffusion Generate CLI](docs/06-diffusion-generate-cli.md) and its
-  [file reference](docs/reference/diffusion-generate-cli.md). They trace the
-  installed and secondary dispatchers through diffusion model detection,
-  `ServerArgs`/model-specific `SamplingParams` precedence, `DiffGenerator`,
-  local/remote scheduler clients, worker launch, prompt/output expansion,
-  persistence, metrics, LoRA/action controls, and cleanup.
-- Completed the root generate wrapper/classifier, six-file diffusion CLI
-  package, package/server-args façades, `DiffGenerator`, entry-point output
-  helpers, launch dispatcher, and sync/async scheduler client. Added explicit
-  partial boundaries for CLI-reached sampling configuration, `Req`/`OutputBatch`,
-  GPU-worker output/entry symbols, and diffusion `ServerArgs`.
-- Explained that the active public symbol is `DiffGenerator`; the installed
-  command bypasses the secondary diffusion CLI `main`; worker-side saved-path
-  transport is the default; DP routing is separate from within-replica model
-  parallelism; and the unreferenced `launch_distributed` torchrun helper targets
-  a path absent from the pinned snapshot.
-- Covered ten focused test/harness files and partial slices of four
-  mixed-purpose tests. Recorded the absence of isolated tests for root
-  generate dispatch, config/CLI sampling precedence, malformed Diffusers JSON,
-  performance-report selection, all-groups-failed exit status, and the dead
-  torchrun helper.
-- Marked Phase 1's public-surface study complete while preserving deeper
-  diffusion sampling, managers, orchestrator, pipelines, models, caches, and
-  kernels for Phase 7. Updated architecture/study navigation, dependency map,
-  glossary, reference indexes, coverage policy/counts, inventory, and ledger
-  rows.
+- Added [Native `/generate` Protocol](docs/07-native-generate-protocol.md) and
+  its [file reference](docs/reference/native-generate-protocol.md). They trace
+  `GenerateReqInput` normalization through sampling preparation,
+  tokenization/media processing, scheduler admission, token-ID output,
+  incremental detokenization, request-ID correlation, JSON/SSE shaping, and
+  cancellation.
+- Completed the request-header mapper, SRT `SamplingParams`, scheduler output
+  sender/streamer, and detokenizer files. Expanded explicit partial boundaries
+  for native HTTP, generation schemas, tokenizer manager, scheduler admission,
+  and `Req` state without claiming their unrelated management, cache, parser,
+  or execution responsibilities.
+- Documented request/result cardinality for batch and `n > 1`, cumulative
+  versus incremental streaming ownership, trusted-header precedence,
+  multimodal post-expansion length checks, prefix-matched explicit abort, and
+  the difference between dispatch success and abort acknowledgement.
+- Recorded two source-visible edge cases: prompt validation permits exactly
+  two of text/token IDs/embeddings and can mix text-derived cardinality with
+  token-ID execution despite its one-input error message; and
+  parallel sampling's normalized parent IDs do not have a clear one-to-one
+  relationship with generated choice IDs for state cleanup and HTTP abort.
+- Covered nine focused test files and partial slices of four mixed-purpose
+  suites. Recorded missing native HTTP coverage for both streaming modes,
+  in-band stream errors, actual client-close cancellation, and combined batch
+  plus parallel sampling.
+- Updated architecture/study navigation, dependency map, glossary, reference
+  indexes, coverage policy/counts, inventory, and ledger rows for the first
+  Phase 3 protocol subunit.
 
 ## Validation in the latest run
 
 - Confirmed `.source/sglang` remained at the pinned commit with a clean worktree.
 - Rebuilt and checked the 8,319-row inventory; status totals match this file.
-- Checked 204 local/coverage links and 217 pinned source links, including local
-  anchors, ledger note targets, tracked source paths, and source line ranges.
-- Parsed the 19 reached Python source files and checked the active dispatcher,
-  argument-precedence, output-transport, data-parallel control, dead-helper,
-  and exact 26-method `DiffGenerator` catalog claims against the pinned tree.
-- Attempted the focused diffusion unit tests, but collection stopped before any
-  test ran because the available Python environment lacks `orjson`.
+- Checked 110 Markdown local links, all 122 ledger note targets, and 823 pinned
+  source links, including local anchors, tracked source paths, and source line
+  ranges.
+- Parsed 23 native-guide Python files and structurally checked five complete
+  runtime-file catalogs, native POST/PUT and abort routes, six transport
+  schemas, tokenizer/scheduler boundary methods, prompt-selection and
+  parallel-sampling/abort edge conditions, and focused-test assertion caveats.
+- Attempted five focused CPU/unit test files with the source package on
+  `PYTHONPATH`, but collection stopped before any test ran because the available
+  Python environment lacks `orjson` and `msgspec`.
 - No GPU/model end-to-end suite was attempted because those tests require
   accelerator resources and model downloads; this run changes only study
   Markdown and ledger metadata.
 
 ## Next coherent study unit
 
-Begin Phase 3 with SRT's native `/generate` protocol. Trace
-`http_server.generate_request` through `GenerateReqInput` normalization,
-`srt/sampling/sampling_params.py`, tokenizer/media preparation, request-state
-correlation, scheduler messages, detokenizer output, SSE/non-streaming response
-shapes, disconnect/cancellation behavior, and focused native-API tests. Keep
-OpenAI, Anthropic, Ollama, gRPC, grammar/tool, and session adapters as the next
-ordered protocol subunits.
+Continue Phase 3 with the OpenAI completions and chat-completions adapters.
+Trace their schemas, validation, chat-template/tool-parser preparation, usage
+and logprob conversion, streaming chunks, error/status compatibility, and
+convergence on `GenerateReqInput`. Then cover embeddings/scoring before the
+Anthropic, Ollama, gRPC, grammar/tool, and session protocol subunits.
 
 ## Known gaps
 
-- Phase 1 public surfaces are complete. Protocol-specific serving adapters and
-  their shared request-preparation machinery are the next gap.
+- Phase 1 public surfaces and the native `/generate` Phase 3 subunit are
+  complete. OpenAI and other protocol adapters remain the next gap.
 - The shared frontend test-program file is partial outside the provider-reached
   functions, and no focused Anthropic, LiteLLM, or Vertex AI backend tests are
   present in the pinned snapshot.
@@ -103,14 +105,16 @@ ordered protocol subunits.
   providers, and runtime-context derived helpers remain assigned to their
   owning subsystem passes rather than being treated as complete here.
 - Request/control schemas and tokenizer/control manager files remain partial
-  outside the methods exercised by the offline API; session-controller and
-  weight/cache/model-worker internals retain their later subsystem passes.
+  outside the native/offline paths now explained; parser caches observability
+  multi-tokenizer elastic session-controller weight/cache and model-worker
+  internals retain their later subsystem passes.
 - Diffusion CLI, launch, client, and output helpers are complete; sampling
   details, request/worker files outside the public slices, managers,
   disaggregation protocols, pipelines, models, caches, and kernels remain for
   Phase 7.
-- Scheduler admission/batching, radix/KV caches, model execution, model/layer
-  families, kernels, and distributed/advanced SRT modes remain.
+- Native scheduler admission and output boundaries are explained; batching
+  policy, radix/KV caches, model execution, model/layer families, kernels, and
+  distributed/advanced SRT modes remain.
 - Rust crates, gateway, router, tests, benchmarks, examples, docs, packaging,
   deployment, CI, release, security, and operations need dedicated guides.
 - The current architecture trace names only the entry symbols in several large

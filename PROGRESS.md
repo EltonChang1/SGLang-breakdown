@@ -32,7 +32,7 @@
 - Inventory: [`docs/coverage/inventory.csv`](docs/coverage/inventory.csv)
 - Policy and counts: [`docs/coverage/README.md`](docs/coverage/README.md)
 - Generator: [`scripts/build_coverage_inventory.py`](scripts/build_coverage_inventory.py)
-- Current statuses: 109 covered, 31 partial, 92 inventory-only, 8,087 pending.
+- Current statuses: 137 covered, 35 partial, 92 inventory-only, 8,055 pending.
 
 Every row includes a pinned source URL and category. Covered and partial rows
 link to their note. Inventory-only rows explain why line-by-line notes are not
@@ -40,76 +40,79 @@ useful. Pending rows state which future pass owns them.
 
 ## Completed in the latest run
 
-- Added [OpenAI Completions and Chat
-  Completions](docs/08-openai-completions.md) and its [file
-  reference](docs/reference/openai-completions.md). They trace both FastAPI
-  routes through shared validation/error policy, request mapping or message
-  rendering, native generation, reasoning/tool parsing, usage/logprobs,
-  extensions, and JSON/SSE shaping.
-- Completed the empty OpenAI package marker, shared serving base, text
-  completion adapter, chat-encoding dispatcher, usage processor, response
-  utilities, and compact chat SSE builder. Added explicit partial boundaries
-  for the shared protocol schema and the model-specific branches of the large
-  chat adapter.
-- Documented completion prompt and response cardinality, echo, structured
-  output constraints, chat schema normalization, Jinja/conversation/custom
-  encoder selection, media extraction, assistant prefill, tool constraints,
-  reasoning ownership, semantic stream chunk order, and extension placement.
-- Recorded compatibility gaps that are visible in source: accepted completion
-  fields such as `best_of`, `suffix`, `user`, and `session_params` are not
-  consumed; body `custom_labels` is ignored in favor of the configured header;
-  and the upstream tutorial's per-choice `sgl_ext` claim conflicts with the
-  response-level `sglext` implementation.
-- Covered the three directly relevant user documentation/example files, the
-  complete completion unit suite, the LoRA parsing suite, two validation
-  suites, and the remaining OpenAI slice of request-length validation. Kept
-  broad protocol and chat unit files partial where later API or model-format
-  assertions remain.
-- Updated architecture/study navigation, dependency and terminology maps,
-  reference indexes, coverage policy/counts, inventory, and ledger rows for
-  the second Phase 3 protocol subunit.
+- Added [Embeddings, Classification, Scoring, Reranking, and
+  Tokenization](docs/09-openai-embeddings-and-scoring.md) and its [file
+  reference](docs/reference/openai-embeddings-and-scoring.md). They trace six
+  public API families from FastAPI schemas through template/token/media
+  preparation, accelerator or tokenizer-only execution, and response shaping.
+- Explained why the shared internal embedding transport can mean dense
+  vectors, class logits, reward/cross-encoder scores, or pooled states. Covered
+  capability resolution, Matryoshka dimension checks, embedding overrides,
+  cross-encoder pair handling, pooling, result correlation, and little-endian
+  base64 serialization.
+- Distinguished CausalLM score semantics from classification-head semantics,
+  including selected-token probability normalization, zero-decode requests,
+  multi-item scoring delimiter invariants, and optional pooled-state return.
+- Documented rerank's cross-encoder, text-decoder, and VL-decoder backends,
+  including heuristic backend selection, media fallback, yes/no score
+  extraction, the serial VL loop, stable source indices, document omission,
+  and bounded `top_n` selection.
+- Covered tokenize/detokenize's tokenizer-process-only path and chat-serving
+  reuse. Recorded source-visible documentation drift around classify fallback
+  labels, rerank defaults, score terminology and supported model families, and
+  the nominally tokenizer-free example.
+- Completed 28 source, documentation, example, and focused-test ledger rows and
+  added four explicit partial boundaries for model configuration, batch-result
+  processing, the native API guide, and the broad OpenAI server suite. Updated
+  architecture/study navigation, dependency and terminology maps, indexes,
+  coverage policy/counts, inventory, and shared-file rows.
 
 ## Validation in the latest run
 
-- Confirmed `.source/sglang` remained at the pinned commit with a clean worktree.
+- Confirmed `.source/sglang` remained at the pinned commit with a clean
+  worktree.
 - Rebuilt and checked the 8,319-row inventory; status totals match this file.
-- Checked 121 Markdown local links, all 140 ledger note targets, and 917 pinned
+- Checked 133 Markdown local links, all 172 ledger note targets, and 1,108 pinned
   source links, including local anchors, tracked source paths, and source line
   ranges.
-- Parsed 15 OpenAI-guide Python files and structurally checked the complete
-  base, completion, encoding-dispatch, usage, utility, and SSE catalogs;
-  request routes; accepted-but-inert versus forwarded fields; tool-constraint
-  and usage-stride claims; documentation drift; and focused test counts.
-- Attempted collection of the protocol, completion, chat, and LoRA unit suites
-  with the source package on `PYTHONPATH`, but no tests collected because the
-  environment lacks `orjson`; `msgspec` is also absent.
+- AST-parsed nine embedding/scoring Python files and structurally checked 18
+  score, rerank, tokenize, pooling, and capability markers against the pinned
+  source.
+- Attempted collection of four CPU-oriented embedding capability, adapter,
+  pooler, and override suites with the source package on `PYTHONPATH`, but no
+  tests collected because the environment lacks `orjson`; `msgspec` is also
+  absent.
 - No GPU/model end-to-end suite was attempted because those tests require
   accelerator resources and model downloads; this run changes only study
   Markdown and ledger metadata.
 
 ## Next coherent study unit
 
-Continue Phase 3 with OpenAI embeddings, classification, score, rerank, and
-tokenize/detokenize adapters. Trace their schemas, template/token/media
-preparation, `EmbeddingReqInput` or generation fallback, pooled-result
-shaping, error/status behavior, tests, and user documentation. Then cover the
-Responses API before Anthropic, Ollama, gRPC, parser, and session subunits.
+Continue Phase 3 with the OpenAI Responses API. Trace request normalization,
+state and previous-response handling, item/tool/reasoning conversion, streaming
+events, usage and error semantics, tests, and user documentation. Then cover
+Anthropic, Ollama, gRPC, parser, and session subunits.
 
 ## Known gaps
 
-- Phase 1 public surfaces plus native generation and OpenAI completion/chat
-  Phase 3 subunits are complete at their generic adapter boundaries. Embedding,
-  Responses, and the remaining protocol adapters are the next gaps.
+- Phase 1 public surfaces plus native generation and OpenAI completion/chat/
+  embedding/classify/score/rerank/tokenize Phase 3 subunits are complete at
+  their generic adapter boundaries. Responses and the remaining protocol
+  adapters are the next gaps.
 - The shared frontend test-program file is partial outside the provider-reached
   functions, and no focused Anthropic, LiteLLM, or Vertex AI backend tests are
   present in the pinned snapshot.
 - Model- and backend-specific configuration handlers, declarative override
   providers, and runtime-context derived helpers remain assigned to their
   owning subsystem passes rather than being treated as complete here.
-- OpenAI protocol.py and serving_chat.py remain partial: non-completion schemas
-  plus DeepSeek-3.2/4, Kimi K3, Inkling, reasoning-family, and model-specific
-  tool-parser implementations retain dedicated passes. The broad chat unit
-  suite remains partial on the same boundary.
+- OpenAI protocol.py and serving_chat.py remain partial: Responses,
+  transcription, file/batch schemas plus DeepSeek-3.2/4, Kimi K3, Inkling,
+  reasoning-family, and model-specific tool-parser implementations retain
+  dedicated passes. The broad chat unit suite remains partial on the same
+  boundary.
+- No focused `/v1/classify` test exists in the pinned snapshot; classification
+  behavior is currently supported by shared embedding/pooling coverage and
+  source inspection rather than a route-specific regression suite.
 - Request/control schemas and tokenizer/control manager files remain partial
   outside the native/offline paths now explained; parser caches, observability,
   multi-tokenizer, elastic, session-controller, weight/cache, and model-worker

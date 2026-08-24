@@ -24,19 +24,22 @@ The initial inventory contains 8,319 unique tracked paths:
 | Asset | 4 |
 | Generated | 2 |
 
-After the OpenAI completion/chat pass, 109 paths are `covered`, 31 are
-`partial`, 92 are justified `inventory-only`, and 8,087 remain `pending`.
+After the embedding, classification, scoring, reranking, and tokenization pass,
+137 paths are `covered`, 35 are `partial`, 92 are justified `inventory-only`,
+and 8,055 remain `pending`.
 Small CLI, config-merging, argument-metadata, in-tree platform, offline-engine
 adapter,
 scoring, frontend IR/interpreter, tracing, choice-policy, SRT frontend HTTP
 adapter, provider backend/template/example, diffusion generate/launch/client,
 output-helper, native sampling, request-header, output-streaming,
 detokenization, OpenAI adapter base/completion/usage/logprob/SSE helpers,
-user-facing OpenAI completion/vision material, and focused test files have
-complete references. Large shared schema, tokenizer, scheduler, control,
-policy, worker, pipeline-request, chat, runtime, and mixed-purpose test files
-remain partial; a link to one symbol must not be mistaken for complete file
-coverage.
+embedding capability records, embedding/classify/score/rerank/token adapters,
+pooling and embedding-override helpers, user-facing OpenAI material, and
+focused test files have complete references. Large shared schema,
+model-configuration, tokenizer, scheduler, result-processing, control, policy,
+worker, pipeline-request, chat, runtime, native-API documentation, and
+mixed-purpose test files remain partial; a link to one symbol must not be
+mistaken for complete file coverage.
 
 ## Status meanings
 

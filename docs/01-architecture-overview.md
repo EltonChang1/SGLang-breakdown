@@ -196,6 +196,17 @@ OpenAI-compatible choices, usage, logprobs, extensions, and SSE records
 The full compatibility and parser boundary is in [OpenAI Completions and Chat
 Completions](08-openai-completions.md).
 
+Embedding, classification, score, and rerank adapters use a second shared
+runtime branch. Most construct `EmbeddingReqInput`, which performs prefill and
+pooling without autoregressive decode; CausalLM scoring and decoder-only
+reranking instead construct zero- or one-token `GenerateReqInput` records for
+selected-label logprobs. Tokenize/detokenize stay entirely in the API process.
+The internal `embedding` result field can therefore hold a dense vector,
+classification logits, or a scalar cross-encoder score—the public adapter
+assigns its meaning. See [Embeddings, Classification, Scoring, Reranking, and
+Tokenization](09-openai-embeddings-and-scoring.md) for the capability model,
+all route branches, pooled-result flow, and failure boundaries.
+
 ## Core invariants and failure boundaries
 
 - **A `ServerArgs` record is resolved once.** Re-entering non-idempotent
@@ -243,3 +254,5 @@ Completions](08-openai-completions.md).
   worker and backend, then explain where that path first meets SRT.
 - Trace an OpenAI chat message to `GenerateReqInput`, then identify which
   components turn model text back into reasoning, content, and tool calls.
+- Compare an embedding request, sequence-classification score request, and
+  decoder-only rerank request at the point each reaches the scheduler.

@@ -193,6 +193,38 @@ extracts tools; the native runtime only executes the resulting generation
 request. See [OpenAI Completions and Chat
 Completions](08-openai-completions.md) for the complete flow.
 
+## Embedding and scoring dependency boundary
+
+The non-generation adapters share transport but not result semantics:
+
+```text
+embedding/classify/cross-encoder -> EmbeddingReqInput -> prefill + pool/head
+CausalLM score/text rerank       -> GenerateReqInput  -> selected logprobs
+VL rerank                         -> GenerateReqInput  -> one generated token
+tokenize/detokenize               -> tokenizer only   -> no scheduler request
+```
+
+| Component | Depends on | Supplies |
+| --- | --- | --- |
+| embedding capability spec | checkpoint architectures, explicit user intent, EmbeddingGemma predicate | task/execution/pooling/cache/graph contract and `/model_info` plan |
+| embedding adapter | OpenAI input union, template manager, tokenizer Jinja, media arrays, LoRA/routing/override controls | one or batched `EmbeddingReqInput` plus float/base64 vectors |
+| classification adapter | task-head output and config `id2label`/`num_labels` | softmax probabilities and a selected label |
+| score mixin | query/item composition, model generation mode, optional MIS and overrides | zero-decode selected-token probabilities or task-head score vectors |
+| rerank adapter | template/model/input backend detection | cross-encoder, text-decoder, or VL-decoder relevance records |
+| tokenizer manager | tokenizer/media processor, dimension/length/override validation | `TokenizedEmbeddingReqInput` and correlated final vectors |
+| pooler/task head | packed hidden states, pooling type, dimensions, normalization, MIS indices | dense embeddings, logits, scalar scores, optional pre-head states |
+| tokenization adapters | prompt/chat schema and tokenizer/template state | token IDs or decoded text without accelerator work |
+
+`EmbeddingReqInput` is a transport name, not a semantic guarantee. Dense
+embedding models usually truncate then normalize pooled hidden states;
+sequence-classification models apply a task head; cross encoders activate and
+squeeze a scalar. `BatchEmbeddingOutput` returns all three through the same
+request-ID-correlated channel. CausalLM score and decoder rerank deliberately
+bypass that branch because their labels come from next-token logprobs. See
+[Embeddings, Classification, Scoring, Reranking, and
+Tokenization](09-openai-embeddings-and-scoring.md) for the ordered flow and
+normalization rules.
+
 ## Configuration dependency
 
 Raw CLI/config values become `ServerArgs`; resolution derives a consistent

@@ -103,6 +103,15 @@ mapping, chat message/template/media preparation, tool and reasoning
 constraints, native generation, logprobs, usage, extensions, and JSON/SSE
 response shaping.
 
+[Embeddings, Classification, Scoring, Reranking, and
+Tokenization](09-openai-embeddings-and-scoring.md), with its [file
+reference](reference/openai-embeddings-and-scoring.md), then covers the
+non-generation OpenAI-compatible surfaces. It distinguishes dense pooling,
+classification heads, CausalLM label scoring, multi-item scoring, three rerank
+backends, and tokenizer-only routes; traces multimodal/template/override input
+preparation and final embedding transport; and records compatibility drift in
+the pinned docs and tests.
+
 Questions to answer before continuing:
 
 - Why does `n > 1` become multiple independent request IDs rather than one
@@ -119,6 +128,14 @@ Questions to answer before continuing:
   native request execution, and final OpenAI response shaping?
 - Why are prompt/cache/multimodal token counts strided by n while completion
   and reasoning counts include every choice?
+- Why can the internal `embedding` field mean a dense vector, class logits, or
+  one scalar cross-encoder score?
+- When does `/v1/score` construct a zero-token generation request instead of
+  an embedding request, and what does `apply_softmax=False` mean in each case?
+- Which template/model/input signals choose each rerank backend, and which
+  fallback discards image and video content?
+- Why does chat tokenization reuse chat serving without entering scheduling or
+  detokenization?
 
 ## Phase 4: scheduling and cache ownership
 

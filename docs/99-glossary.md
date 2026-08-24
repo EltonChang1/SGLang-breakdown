@@ -75,6 +75,14 @@ schedulers from the tokenizer process.
 routing/communication across ranks. SGLang separately tracks expert, expert
 data, and expert tensor ranks.
 
+**Embedding path (SRT).** The prefill-only request/result transport built on
+`EmbeddingReqInput`, `TokenizedEmbeddingReqInput`, and `BatchEmbeddingOutput`.
+Despite the name, its output can be a dense embedding, task-head logits, a
+reward, or a scalar cross-encoder score. The public adapter supplies the
+semantic interpretation
+([request record](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/io_struct.py#L1066-L1128),
+[pooler output](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/layers/pooler.py#L26-L44)).
+
 **Frontend language.** The client-side `sglang.lang` programming layer. It runs
 ordinary Python around typed SGL expressions and delegates model operations to
 a frontend backend. It is an orchestrator above remote inference, not the SRT
@@ -102,6 +110,21 @@ distributed modes derive TCP addresses
 already processed tokens. It enables reuse and incremental decoding. Ownership,
 allocation, and eviction receive a dedicated later guide.
 
+**Matryoshka embedding.** An embedding trained so an allowed leading prefix of
+the full vector remains useful. SGLang validates the requested dimension,
+truncates before normalization, and can return different vector widths for
+requests in one batch
+([validation](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/tokenizer_manager.py#L1267-L1293),
+[pooler](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/layers/pooler.py#L184-L210)).
+
+**MIS / multi-item scoring.** A scoring mode that packs one query and many
+items into a delimiter-indexed sequence. It produces one boundary result plus
+one result per item; the query-boundary result is discarded after strict count
+validation. Delimiter indices, not a scan for the placeholder token, define
+the scoring positions
+([packing](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/tokenizer_manager_score_mixin.py#L68-L87),
+[result processing](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/tokenizer_manager_score_mixin.py#L110-L190)).
+
 **Offline Engine.** The in-process `sglang.Engine` Python API. It avoids an
 HTTP/gRPC request boundary but still launches the shared tokenizer, scheduler,
 detokenizer, IPC, and model-execution topology. "Offline" is a transport choice,
@@ -109,11 +132,13 @@ not a promise of single-process execution. See
 [Offline Engine API](03-offline-engine.md).
 
 **OpenAI serving adapter.** A tokenizer-side compatibility layer that validates
-an OpenAI-shaped request, renders or maps it to `GenerateReqInput`, delegates
-to the shared native runtime, and reshapes native results as OpenAI JSON or
-SSE. It does not own scheduling or model execution, and accepting an official
-field does not prove the field has behavior. See [OpenAI Completions and Chat
-Completions](08-openai-completions.md).
+an OpenAI-shaped request, renders or maps it to `GenerateReqInput`,
+`EmbeddingReqInput`, or tokenizer-only work, delegates when needed, and
+reshapes native results as OpenAI JSON or SSE. It does not own scheduling or
+model execution, and accepting an official field does not prove the field has
+behavior. See [OpenAI Completions and Chat
+Completions](08-openai-completions.md) and [Embeddings, Classification,
+Scoring, Reranking, and Tokenization](09-openai-embeddings-and-scoring.md).
 
 **Output-rank persistence (diffusion).** The default diffusion transport in
 which the worker output rank writes generated media and clears tensor/audio
@@ -130,6 +155,12 @@ metadata, builds role/scope contexts, streams text, and creates fork groups. Its
 **PP / pipeline parallelism.** Splitting model stages across ranks. The launcher
 creates scheduler processes over PP and TP rank ranges; pipeline mode selects
 special scheduler loops and imposes compatibility constraints.
+
+**Pooler.** A model-side layer that reduces per-token hidden states to one or
+more request-level vectors. SGLang's common pooler supports last-token, CLS,
+and mean strategies, optional Matryoshka truncation, normalization, task heads,
+cross-encoder scoring, and MIS delimiter positions
+([implementation](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/layers/pooler.py#L47-L263)).
 
 **Prefill.** Processing prompt/input tokens to populate model state and KV
 cache before decode. Chunked prefill divides large prefill work so it can be

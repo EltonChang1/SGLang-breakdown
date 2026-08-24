@@ -30,3 +30,6 @@ its exact status.
 - [OpenAI completions](openai-completions.md): completion/chat schemas, shared
   adapter lifecycle, message rendering, native handoff, reasoning/tools, usage,
   logprobs, streaming, extensions, documentation, examples, and focused tests.
+- [Embedding and scoring adapters](openai-embeddings-and-scoring.md): embedding
+  capability discovery; embedding/classification/score/rerank schemas and
+  adapters; pooling and MIS; tokenization; documentation, examples, and tests.

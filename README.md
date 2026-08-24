@@ -1,10 +1,6 @@
 # SGLang Breakdown
 
-A source-linked, top-to-bottom study guide for
-[`EltonChang1/sglang`](https://github.com/EltonChang1/sglang).
-
-This repository is built incrementally by an hourly Codex automation. The guide
-aims to explain every meaningful part of SGLang: architecture, runtime flows,
+The guide aims to explain every meaningful part of SGLang: architecture, runtime flows,
 packages, source files, key symbols, configuration, APIs, tests, build tooling,
 deployment, and examples.
 

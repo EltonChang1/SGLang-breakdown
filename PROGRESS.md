@@ -60,7 +60,9 @@ useful. Pending rows state which future pass owns them.
 - Covered tokenize/detokenize's tokenizer-process-only path and chat-serving
   reuse. Recorded source-visible documentation drift around classify fallback
   labels, rerank defaults, score terminology and supported model families, and
-  the nominally tokenizer-free example.
+  the nominally tokenizer-free example. Also recorded untested contract gaps
+  for nested negative embedding IDs, single-input HTTP embedding overrides,
+  and returned multimodal rerank documents.
 - Completed 28 source, documentation, example, and focused-test ledger rows and
   added four explicit partial boundaries for model configuration, batch-result
   processing, the native API guide, and the broad OpenAI server suite. Updated
@@ -78,10 +80,10 @@ useful. Pending rows state which future pass owns them.
 - AST-parsed all 37 Python source/test files linked by the new guides and
   structurally checked 14 central capability/adapter/pooler symbols plus all
   eight documented route strings against the pinned source.
-- Attempted collection of four CPU-oriented embedding capability, adapter,
-  pooler, and override suites with the source package on `PYTHONPATH`, but no
-  tests collected because the environment lacks `orjson`; `msgspec` is also
-  absent.
+- Attempted collection of six CPU-oriented capability, embedding/rerank
+  adapter, pooler, override, and request-structure suites with the source
+  package on `PYTHONPATH`, but no tests collected because the environment
+  lacks `orjson`; `msgspec` is also absent.
 - No GPU/model end-to-end suite was attempted because those tests require
   accelerator resources and model downloads; this run changes only study
   Markdown and ledger metadata.
@@ -113,6 +115,9 @@ Anthropic, Ollama, gRPC, parser, and session subunits.
 - No focused `/v1/classify` test exists in the pinned snapshot; classification
   behavior is currently supported by shared embedding/pooling coverage and
   source inspection rather than a route-specific regression suite.
+- No focused integration case covers a single-input HTTP embedding override or
+  a multimodal rerank response with `return_documents=true`; nested embedding
+  token batches also bypass the flat-input negative-ID check.
 - Request/control schemas and tokenizer/control manager files remain partial
   outside the native/offline paths now explained; parser caches, observability,
   multi-tokenizer, elastic, session-controller, weight/cache, and model-worker

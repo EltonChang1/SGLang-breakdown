@@ -12,6 +12,12 @@ the runtime. Always name the kind.
 arrives and existing requests finish, rather than holding a static batch for
 its whole lifetime. The detailed scheduler policy is not covered yet.
 
+**Config bag.** A process-local, read-only namespace projected from resolved
+`ServerArgs` fields at publication, such as `get_exec()` or `get_schedule()`.
+It is the runtime source of truth; sanctioned post-publication overrides update
+bags and provenance, not the startup record
+([projection](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/runtime_context.py#L596-L730)).
+
 **CP / context parallelism.** Splitting attention/context work across ranks.
 The code distinguishes attention CP and additional derived rank concepts; do
 not use `CP` as a generic synonym for tensor parallelism.
@@ -51,6 +57,16 @@ special scheduler loops and imposes compatibility constraints.
 cache before decode. Chunked prefill divides large prefill work so it can be
 scheduled with other requests.
 
+**Public readiness.** For the Python HTTP path, the state reached after the
+server is bound and a real generation/embedding warmup succeeds (or warmup is
+explicitly skipped). This is later than scheduler readiness; `/health` returns
+503 while the tokenizer manager is still starting.
+
+**Resolved configuration.** The result of the one-time ordered `ServerArgs`
+pipeline: defaults, compatibility choices, model/hardware policy, and
+validations have been applied and the record is read-only. It is distinct from
+raw CLI/YAML input and from later runtime bag overrides.
+
 **RadixAttention.** SGLang's prefix-sharing approach built around a radix-tree
 view of reusable KV-backed token prefixes. This is an architectural term here;
 the exact cache-node and allocator invariants remain pending.
@@ -59,6 +75,11 @@ the exact cache-node and allocator invariants remain pending.
 tokenized work, admits and batches requests, invokes model execution, manages
 cache/scheduling state, and emits results. There can be multiple scheduler
 processes for parallel ranks.
+
+**Scheduler readiness.** The parent-process handshake sent after a scheduler
+has constructed the model runtime and can report token limits and startup
+timings. It proves model-process initialization, but not yet a successful
+request through the public HTTP path.
 
 **SRT.** SGLang Runtime, implemented primarily under `python/sglang/srt`. It is
 the language-model serving runtime and includes much more than the scheduler:

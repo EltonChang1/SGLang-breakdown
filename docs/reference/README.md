@@ -8,3 +8,6 @@ its exact status.
 - [Serving entry points](entrypoints.md): package import behavior, packaging
   entry points, `sglang serve`, backend discovery, startup dispatch, and the
   default request path into the runtime managers.
+- [Configuration and startup](configuration-startup.md): CLI/YAML schema,
+  one-time resolution and declarations, runtime publication, platform files,
+  rank/port construction, readiness, warmup, and shutdown symbols.

@@ -53,6 +53,17 @@ CLI/config file -> raw ServerArgs -> resolve/check -> publish(role)
 See [`prepare_server_args`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/server_args.py#L10510-L10544),
 [`resolve_once`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/server_args.py#L3667-L3698),
 and [`publish`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/runtime_context.py#L1308-L1355).
+The full dependency order and mutation boundaries are explained in
+[Configuration and startup](02-configuration-and-startup.md).
+
+| Configuration component | Depends on | Supplies |
+| --- | --- | --- |
+| CLI annotation layer | Dataclass types/defaults, `Arg` metadata | One argparse grammar and raw `ServerArgs` |
+| YAML merger | The constructed argparse actions | Lower-precedence CLI tokens, not a second schema |
+| Resolution pipeline | Raw values, model metadata, hardware/platform probes, ordered declarations | A materialized read-only startup record |
+| Runtime publication | Resolved record and `NS` metadata | Process-role provenance and nested config bags |
+| Parallel context | Published topology config and initialized process groups | Configured launch sizes before init; live ranks/groups after init |
+| Launch/warmup | Published config, ports, ranks, scheduler pipes, HTTP lifecycle | Scheduler readiness followed by public service readiness |
 
 ## Questions for later passes
 

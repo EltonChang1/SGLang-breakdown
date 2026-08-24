@@ -24,7 +24,9 @@ labeled, but are not expanded line by line.
 ## Available now
 
 - [Architecture overview](docs/01-architecture-overview.md)
+- [Configuration and startup](docs/02-configuration-and-startup.md)
 - [Serving entry-point reference](docs/reference/entrypoints.md)
+- [Configuration/startup file reference](docs/reference/configuration-startup.md)
 - [Dependency map](docs/90-dependency-map.md)
 - [Glossary](docs/99-glossary.md)
 - [All 8,319 tracked paths in the coverage ledger](docs/coverage/inventory.csv)

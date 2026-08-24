@@ -194,9 +194,11 @@ not user-facing configuration. It also carries a stable instance ID and
 special endpoints for metrics, RPC, tokenizer workers, and speculative modes
 ([lines 10551-10635](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/server_args.py#L10551-L10635)).
 
-**Remaining work.** Argument groups, environment overrides, backend resolution,
-hardware/model-derived defaults, namespace projection, and the full invariant
-matrix need their own configuration guide.
+The dedicated [configuration/startup reference](configuration-startup.md#pythonsglangsrtserver_argspy)
+now covers argument metadata, YAML precedence, resolution/declaration
+semantics, platform defaults, namespace projection, and launch validation.
+Model- and backend-specific `_handle_*` policies remain with their owning
+subsystem guides.
 
 ## `python/sglang/srt/entrypoints/http_server.py`
 

@@ -24,9 +24,10 @@ The initial inventory contains 8,319 unique tracked paths:
 | Asset | 4 |
 | Generated | 2 |
 
-After the first orientation and serving-entry pass, 5 paths are `covered`, 13
-are `partial`, 92 are justified `inventory-only`, and 8,209 remain `pending`.
-Large files touched by the architecture trace remain partial; a link to one
+After the configuration/startup pass, 16 paths are `covered`, 14 are `partial`,
+92 are justified `inventory-only`, and 8,197 remain `pending`. Small CLI,
+config-merging, argument-metadata, and in-tree platform files have complete
+references. Large policy and runtime files remain partial; a link to one
 symbol must not be mistaken for complete file coverage.
 
 ## Status meanings

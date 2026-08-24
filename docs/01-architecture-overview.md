@@ -96,6 +96,9 @@ is explicitly last-publish-wins
 ([`runtime_context.publish`, lines 1308-1355](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/runtime_context.py#L1308-L1355)).
 This is why a child process should read its published view rather than infer
 configuration again from environment variables or raw arguments.
+The [configuration and startup guide](02-configuration-and-startup.md) follows
+the complete raw-to-resolved-to-published lifecycle, platform discovery, rank
+and port construction, both readiness gates, warmup, and shutdown.
 
 ### Topology variations
 

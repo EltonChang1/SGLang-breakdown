@@ -44,6 +44,12 @@ warmup, and shutdown. Treat resolved configuration as an input to later phases;
 otherwise backend-selection code appears to make decisions from raw CLI values
 that have already been transformed.
 
+This phase is now available in [Configuration and startup](02-configuration-and-startup.md),
+with a companion [file and symbol reference](reference/configuration-startup.md).
+Before moving on, be able to distinguish raw, resolved, published, overridden,
+configured-parallel, and live-parallel values, and distinguish scheduler/model
+readiness from public HTTP readiness after warmup.
+
 ## Phase 3: protocols and request preparation
 
 Follow native `/generate`, OpenAI, Anthropic, Ollama, gRPC, and embedding or

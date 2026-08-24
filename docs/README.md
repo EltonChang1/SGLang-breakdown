@@ -5,6 +5,7 @@
 1. [Ordered study path](00-study-path.md)
 2. [Architecture overview](01-architecture-overview.md)
 3. [Serving entry points](reference/entrypoints.md)
+4. [Configuration and startup](02-configuration-and-startup.md)
 
 ## Cross-cutting references
 

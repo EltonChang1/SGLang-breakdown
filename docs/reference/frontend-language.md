@@ -319,10 +319,10 @@ but the scope is not thread-local
 
 ## `python/sglang/lang/chat_template.py`
 
-**Status: partial.** The core record, selection algorithm, role semantics, and
-relationship to frontend execution are covered here. The 27 concrete template
-records and 16 model-path matchers still need a catalog audit against their
-model families and tokenizer conventions.
+**Status: covered.** The core record, selection algorithm, role semantics, and
+relationship to frontend execution are summarized here. The complete audit of
+all 27 records and 16 model-path matchers is in the
+[provider/template file reference](provider-clients-and-templates.md#pythonsglanglangchat_templatepy).
 
 `ChatTemplate` stores default system text, role prefix/suffix pairs, stop
 strings, media tokens, and a style. `get_prefix_and_suffix` handles the special
@@ -339,6 +339,8 @@ Order is therefore part of matching precedence. Concrete records occupy
 [lines 81-537](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/chat_template.py#L81-L537),
 and model-path matchers occupy
 [lines 540-665](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/chat_template.py#L540-L665).
+The catalog identifies four automatic-selection gaps and the `janus-pro`
+capitalized-`User` mismatch with the interpreter's lowercase role.
 
 ## `python/sglang/lang/backend/base_backend.py`
 
@@ -454,11 +456,11 @@ The async server-info helper decodes success and expects an OpenAI-shaped error
 message on failure. `__del__` repeats idempotent shutdown
 ([lines 543-555](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/backend/runtime_endpoint.py#L543-L555)).
 
-## Boundary to the next frontend pass
+## Continue with provider clients
 
-The remaining frontend work starts at concrete provider clients and the full
-template registry. That pass must compare message versus completion modes,
-image conversion, sampling-parameter loss, API speculative execution, token
-usage accounting, selection support, streaming/error contracts, credential
-handling, and tests/examples for every provider. The current `chat_template.py`
-row remains `partial`; provider files remain `pending`.
+The concrete provider adapters and full template registry are now covered in
+[Provider Clients and Prompt Templates](../05-provider-clients-and-templates.md)
+and its [file reference](provider-clients-and-templates.md). Continue there for
+message versus completion modes, image conversion, sampling-parameter loss,
+API speculative execution, token usage, selection, streaming/errors,
+credentials, examples, and tests.

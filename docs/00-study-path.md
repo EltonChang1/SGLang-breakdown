@@ -32,8 +32,11 @@ control methods, weight updates, and shutdown. [Frontend Language Execution](04-
 and its [file reference](reference/frontend-language.md) now trace decorated
 functions through sampling IR, interpreter state, single/batch/stream modes,
 fork/join, choice scoring, tracing and prefix caching, and the first SRT HTTP
-handoff. Provider clients, the complete chat-template catalog, and the
-diffusion `generate` command remain to be written.
+handoff. [Provider Clients and Prompt Templates](05-provider-clients-and-templates.md)
+and its [file reference](reference/provider-clients-and-templates.md) compare
+OpenAI, Anthropic, LiteLLM, Vertex AI, and Crusoe, then audit every frontend
+template record, matcher, provider example, and focused manual test. The
+diffusion `generate` command is the remaining Phase 1 public surface.
 
 Questions to answer before moving on:
 
@@ -44,6 +47,10 @@ Questions to answer before moving on:
   separate inference core?
 - Which thread runs user Python, which thread evaluates expressions, and what
   event makes a generated variable safe to read?
+- Which sampling fields survive each provider adapter, and which backends
+  support choices, media, usage accounting, or API speculation?
+- Why can a model-path matcher, a frontend prefix/suffix template, and an SRT
+  Jinja template make different decisions for the same model?
 - How do `RuntimeEndpoint`, local `Runtime`, and offline `Engine` differ in
   transport, process ownership, and return type?
 

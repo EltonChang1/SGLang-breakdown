@@ -15,6 +15,12 @@ logprobs. Built-ins use token-length normalization, greedy token comparison, or
 unconditional-likelihood normalization
 ([policy interface](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/choices.py#L8-L29)).
 
+**Chat template (frontend).** The lightweight `sglang.lang` record that maps
+roles to prefix/suffix text and supplies default system text, stops, and media
+markers. Model-path selection is ordered and first-match-wins. It is distinct
+from SRT/tokenizer Jinja conversation templates
+([record and registry](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/chat_template.py#L7-L78)).
+
 **Continuous batching.** Scheduling requests into changing batches as work
 arrives and existing requests finish, rather than holding a static batch for
 its whole lifetime. The detailed scheduler policy is not covered yet.
@@ -58,6 +64,13 @@ data, and expert tensor ranks.
 ordinary Python around typed SGL expressions and delegates model operations to
 a frontend backend. It is an orchestrator above remote inference, not the SRT
 scheduler or model loop. See [Frontend Language Execution](04-frontend-language.md).
+
+**Provider client.** A frontend `BaseBackend` implementation that converts
+executor text/messages/media and common sampling values into a remote provider
+SDK call. These clients run synchronously on executor workers and expose
+different capability subsets; they are not SRT's OpenAI/Anthropic server-side
+protocol adapters. See
+[Provider Clients and Prompt Templates](05-provider-clients-and-templates.md).
 
 **Frontend IR.** The `SglExpr` hierarchy representing text, generation,
 selection, roles, media, variables, scopes, forks, and optimization markers.

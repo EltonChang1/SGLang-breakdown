@@ -358,6 +358,10 @@ by the interpreter files covered here. Extension authors must test against the
 actual execution paths they support instead of treating inheritance alone as
 a complete capability check.
 
+The concrete OpenAI, Anthropic, LiteLLM, Vertex AI, and Crusoe implementations,
+including their narrower capability and sampling contracts, are compared in
+[Provider Clients and Prompt Templates](05-provider-clients-and-templates.md).
+
 `RuntimeEndpoint` is the in-tree adapter from this contract to a running SRT
 HTTP server. Construction fetches `/get_model_info` and chooses a chat template;
 generation posts prompt text, sampling parameters, optional logprob controls,

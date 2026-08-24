@@ -17,3 +17,6 @@ its exact status.
 - [Frontend language](frontend-language.md): public factories, sampling IR,
   interpreter state and concurrency, fork/join, choice policies, tracing and
   prefix caching, the backend contract, and the SRT HTTP runtime endpoint.
+- [Provider clients and templates](provider-clients-and-templates.md): OpenAI,
+  Anthropic, LiteLLM, Vertex AI, and Crusoe adapters; all frontend template
+  records and matchers; and the focused examples and manual tests.

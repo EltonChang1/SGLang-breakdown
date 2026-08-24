@@ -43,12 +43,23 @@ public factories -> SglFunction + expression IR -> ProgramState
 | `BaseBackend` | chat template | minimum generation/stream/selection/optimization boundary |
 | `RuntimeEndpoint` | SRT HTTP endpoints | concrete frontend backend for a running SGLang server |
 | `Runtime` | resolved `ServerArgs`, spawned HTTP server, endpoint | owning local convenience wrapper for frontend programs |
+| Provider clients | provider SDK, common sampling conversions, executor text/messages/media | synchronous provider requests and streamed deltas |
+| Frontend chat-template registry | ordered model-name matchers and prefix/suffix records | default system text, serialized role markers, stops, and media tokens |
 
 The Python program thread enqueues expressions; the executor worker mutates
 prompt state and calls the backend. Named variable events join those lanes when
 user Python reads a model result. Batch execution adds a thread pool outside
 that per-program pair. See [Frontend Language Execution](04-frontend-language.md)
 for the ordered single, batch, stream, choice, fork, and trace flows.
+
+Provider adapters do not share one feature-complete request schema. OpenAI can
+choose chat or completion and uniquely supplies frontend selection,
+speculation, and usage counters; Anthropic and LiteLLM always send messages;
+Vertex AI converts messages and media; Crusoe inherits the OpenAI path. Every
+conversion drops common sampling fields. Model-path template matching happens
+before these calls and is first-match-wins. See
+[Provider Clients and Prompt Templates](05-provider-clients-and-templates.md)
+for the capability and data-loss matrices.
 
 `RuntimeEndpoint` is where this frontend first meets SRT: it serializes the
 accumulated prompt and sampling record to `/generate`. The offline `Engine`

@@ -7,7 +7,8 @@
 3. [Serving entry points](reference/entrypoints.md)
 4. [Offline Engine API](03-offline-engine.md)
 5. [Frontend Language Execution](04-frontend-language.md)
-6. [Configuration and startup](02-configuration-and-startup.md)
+6. [Provider Clients and Prompt Templates](05-provider-clients-and-templates.md)
+7. [Configuration and startup](02-configuration-and-startup.md)
 
 ## Cross-cutting references
 

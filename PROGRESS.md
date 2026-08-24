@@ -32,7 +32,7 @@
 - Inventory: [`docs/coverage/inventory.csv`](docs/coverage/inventory.csv)
 - Policy and counts: [`docs/coverage/README.md`](docs/coverage/README.md)
 - Generator: [`scripts/build_coverage_inventory.py`](scripts/build_coverage_inventory.py)
-- Current statuses: 28 covered, 16 partial, 92 inventory-only, 8,183 pending.
+- Current statuses: 55 covered, 16 partial, 92 inventory-only, 8,156 pending.
 
 Every row includes a pinned source URL and category. Covered and partial rows
 link to their note. Inventory-only rows explain why line-by-line notes are not
@@ -40,55 +40,66 @@ useful. Pending rows state which future pass owns them.
 
 ## Completed in the latest run
 
-- Added [Frontend Language Execution](docs/04-frontend-language.md), tracing a
-  decorated Python function through expression construction, program and
-  executor threads, prompt/message/variable/media state, sampling-default
-  overlay, sync/batch/stream modes, role/scoped output, fork/join, choice
-  scoring, tracing, prefix caching, and the SRT HTTP handoff.
-- Added the companion [file and symbol reference](docs/reference/frontend-language.md).
-  It completes `api.py`, `global_config.py`, `ir.py`, `interpreter.py`,
-  `choices.py`, `tracer.py`, `base_backend.py`, and `runtime_endpoint.py`; it
-  gives `chat_template.py` an explicit partial boundary before a model-family
-  catalog pass.
-- Documented non-obvious safety rules: `.bind()` drops API-speculation size and
-  bound values override same-named call keywords; sampling `clone()` drops
-  dtype/regex;
-  worker failures can remain stored on a returned state; batch generator style
-  is chunked but input-ordered; fork position offsets and several nominal
-  backend hooks are not wired by this interpreter; trace scope is not
-  thread-local; and `Runtime`, `RuntimeEndpoint`, and `Engine` have different
-  transport, ownership, and result contracts.
-- Updated the architecture overview, study path, documentation/reference
-  indexes, dependency map, glossary, coverage policy/counts, and every affected
-  coverage row.
+- Added [Provider Clients and Prompt Templates](docs/05-provider-clients-and-templates.md)
+  and its [file reference](docs/reference/provider-clients-and-templates.md).
+  They trace executor state into OpenAI, Anthropic, LiteLLM, Vertex AI, and
+  Crusoe; compare request shapes and lossy sampling conversions; and explain
+  credentials, retries, token usage, streaming, selection, API speculation,
+  media conversion, and failure behavior.
+- Completed `openai.py`, `anthropic.py`, `litellm.py`, `vertexai.py`,
+  `crusoe.py`, and `chat_template.py`. The template audit represents all 27
+  records and all 16 ordered model-path matchers, including four
+  explicit-only/fallback records and the automatically selected `janus-pro`
+  capitalized-`User` mismatch.
+- Covered 18 provider quick-start/usage examples and three manual test files.
+  Added an explicit partial boundary for the 14 shared functions in
+  `python/sglang/test/test_programs.py` reached by provider suites, and recorded
+  the absence of focused Anthropic, LiteLLM, and Vertex AI backend tests.
+- Documented non-obvious portability rules: OpenAI streaming forwards both
+  token-limit fields while ordinary generation selects one; `n > 1` stores a
+  list but advances the prompt with candidate zero; OpenAI selection ignores
+  the common choice policy; chat speculative state and usage counters are
+  unlocked backend-instance state; Anthropic removes the leading system
+  message from executor history; and Vertex's role-free image path passes a
+  base64 string to `Image.from_bytes` while message media is always labeled
+  JPEG.
+- Updated the architecture/study navigation, dependency map, glossary,
+  frontend cross-links, coverage policy/counts, inventory, and affected ledger
+  rows.
 
 ## Validation in the latest run
 
 - Confirmed `.source/sglang` remained at the pinned commit with a clean worktree.
 - Rebuilt and checked the 8,319-row inventory; status totals match this file.
-- Validated local Markdown targets and anchors, coverage-note anchors, and
-  pinned source paths and line ranges.
-- Ran focused AST/source checks for frontend file ownership and documented
-  `SglSamplingParams.clone`, `.bind()`, batch-result ordering, backend-hook, and
-  fork-offset claims.
+- Validated local Markdown targets and anchors, coverage-note anchors, and 354
+  pinned source links and line ranges across the affected navigation and notes.
+- Ran focused AST/source checks proving the 27-record/16-matcher catalog is
+  exact, the four non-matcher records are identified, all 18 covered provider
+  examples match the ledger, the Janus role mismatch is source-backed, and the
+  documented provider sampling/state branches are present.
+- Parsed the five provider files, template registry, and three manual tests
+  without writing bytecode.
 - `git diff --check` passed. No model/server runtime test was attempted because
-  this run changes only study Markdown and ledger metadata.
+  provider suites require live credentials, network access, and changing
+  external models; this run changes only study Markdown and ledger metadata.
 
 ## Next coherent study unit
 
-Finish the frontend client layer by comparing `backend/openai.py`,
-`anthropic.py`, `litellm.py`, `vertexai.py`, and `crusoe.py`; audit all concrete
-records and matcher precedence in `chat_template.py`; and connect the relevant
-frontend examples and tests. Trace message versus completion mode, media,
-sampling-field loss, API speculative execution, usage accounting, streaming,
-selection support, credentials, and error behavior before moving to the
-diffusion CLI.
+Finish Phase 1 with the diffusion `generate` public surface. Start at
+`python/sglang/multimodal_gen/runtime/entrypoints/cli/main.py`, `generate.py`,
+`cli_types.py`, and `utils.py`; trace argument/config construction into
+`DiffusionGenerator`, output persistence, distributed launch behavior, and the
+focused CLI-generate tests. Keep the deeper diffusion managers, pipelines,
+models, and caches assigned to Phase 7.
 
 ## Known gaps
 
-- Provider client backends, the concrete chat-template catalog, diffusion CLI,
-  and protocol-specific serving adapters are not yet covered. The common
-  frontend IR/interpreter and SRT HTTP endpoint are complete.
+- The frontend provider clients and concrete lightweight chat-template catalog
+  are complete. The diffusion CLI and protocol-specific serving adapters are
+  not yet covered.
+- The shared frontend test-program file is partial outside the provider-reached
+  functions, and no focused Anthropic, LiteLLM, or Vertex AI backend tests are
+  present in the pinned snapshot.
 - Model- and backend-specific configuration handlers, declarative override
   providers, and runtime-context derived helpers remain assigned to their
   owning subsystem passes rather than being treated as complete here.

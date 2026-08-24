@@ -59,7 +59,10 @@ media, and streaming state and calls a selected `BaseBackend`
 [`StreamExecutor`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/interpreter.py#L274-L340)).
 Its `RuntimeEndpoint` backend reaches an SRT server through `/generate`; other
 backends can reach providers instead. The complete client-side flow is in
-[Frontend Language Execution](04-frontend-language.md).
+[Frontend Language Execution](04-frontend-language.md). The concrete provider
+request shapes, sampling losses, templates, credentials, retries, examples,
+and tests are in
+[Provider Clients and Prompt Templates](05-provider-clients-and-templates.md).
 
 The `sglang serve` command is a dispatcher, not just an alias for one server.
 It normalizes a positional model path, discovers installed serve backends,

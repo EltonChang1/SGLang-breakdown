@@ -75,9 +75,9 @@ useful. Pending rows state which future pass owns them.
 - Checked 133 Markdown local links, all 172 ledger note targets, and 1,108 pinned
   source links, including local anchors, tracked source paths, and source line
   ranges.
-- AST-parsed nine embedding/scoring Python files and structurally checked 18
-  score, rerank, tokenize, pooling, and capability markers against the pinned
-  source.
+- AST-parsed all 37 Python source/test files linked by the new guides and
+  structurally checked 14 central capability/adapter/pooler symbols plus all
+  eight documented route strings against the pinned source.
 - Attempted collection of four CPU-oriented embedding capability, adapter,
   pooler, and override suites with the source package on `PYTHONPATH`, but no
   tests collected because the environment lacks `orjson`; `msgspec` is also

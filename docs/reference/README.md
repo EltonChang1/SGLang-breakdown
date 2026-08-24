@@ -33,3 +33,6 @@ its exact status.
 - [Embedding and scoring adapters](openai-embeddings-and-scoring.md): embedding
   capability discovery; embedding/classification/score/rerank schemas and
   adapters; pooling and MIS; tokenization; documentation, examples, and tests.
+- [OpenAI Responses](openai-responses.md): item/chat/Harmony normalization,
+  response state and continuation, function and built-in tools, ordinary and
+  typed-stream output, Exa/MCP integration, documentation, and focused tests.

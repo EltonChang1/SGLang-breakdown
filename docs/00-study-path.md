@@ -112,6 +112,14 @@ backends, and tokenizer-only routes; traces multimodal/template/override input
 preparation and final embedding transport; and records compatibility drift in
 the pinned docs and tests.
 
+[OpenAI Responses API](10-openai-responses.md), with its [file
+reference](reference/openai-responses.md), completes the item-oriented OpenAI
+generation surface. It follows ordinary and GPT-OSS/Harmony prompt protocols,
+previous-response replay, background and in-memory state, structured output,
+reasoning and function items, server-executed browser/Python loops, regular and
+Harmony SSE state machines, usage/errors, operational trust boundaries, and
+focused test gaps.
+
 Questions to answer before continuing:
 
 - Why does `n > 1` become multiple independent request IDs rather than one
@@ -136,6 +144,12 @@ Questions to answer before continuing:
   fallback discards image and video content?
 - Why does chat tokenization reuse chat serving without entering scheduling or
   detokenization?
+- Why is `previous_response_id` an in-process replay mechanism rather than a
+  scheduler session or durable conversation record?
+- Which Responses tool definitions merely validate, which return control to
+  the client, and which can execute another model turn inside SGLang?
+- Why do regular and Harmony Responses streams have different item, usage,
+  error, and logprob guarantees?
 
 ## Phase 4: scheduling and cache ownership
 

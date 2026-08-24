@@ -106,6 +106,13 @@ carried by `PortArgs`; local mode primarily uses `ipc://` files, while some
 distributed modes derive TCP addresses
 ([`PortArgs`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/server_args.py#L10551-L10635)).
 
+**Harmony.** GPT-OSS's role/channel/recipient message and token protocol. The
+Responses adapter uses it instead of an SRT chat template for GPT-OSS, parses
+analysis/final/tool recipients from output token IDs, and can rerender the
+conversation after server-executed browser or Python work. It is not a generic
+synonym for reasoning or tool calling
+([message conversion](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/harmony_utils.py#L142-L245)).
+
 **KV cache.** Accelerator or tiered storage for attention keys and values from
 already processed tokens. It enables reuse and incremental decoding. Ownership,
 allocation, and eviction receive a dedicated later guide.
@@ -139,6 +146,20 @@ model execution, and accepting an official field does not prove the field has
 behavior. See [OpenAI Completions and Chat
 Completions](08-openai-completions.md) and [Embeddings, Classification,
 Scoring, Reranking, and Tokenization](09-openai-embeddings-and-scoring.md).
+
+**Responses state (Python SRT).** The in-memory `msg_store`, `response_store`,
+and background-task map owned by `OpenAIServingResponses`. They support
+`previous_response_id`, retrieval, and background cancellation in one API
+process but have no TTL, persistence, or cross-worker sharing. They are
+distinct from scheduler sessions and the Rust gateway's storage
+([stores](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/openai/serving_responses.py#L178-L192)).
+
+**Responses output item.** The semantic unit returned by `/v1/responses`, such
+as assistant `message`, `reasoning`, `function_call`, web-search, or
+code-interpreter work. Regular streaming owns an added/delta/done lifecycle
+per item and builds the final response from items closed in wire order; it is
+not a chat-completion choice
+([regular stream state](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/openai/serving_responses.py#L1997-L2215)).
 
 **Output-rank persistence (diffusion).** The default diffusion transport in
 which the worker output rank writes generated media and clears tensor/audio

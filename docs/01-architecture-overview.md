@@ -196,6 +196,19 @@ OpenAI-compatible choices, usage, logprobs, extensions, and SSE records
 The full compatibility and parser boundary is in [OpenAI Completions and Chat
 Completions](08-openai-completions.md).
 
+The Responses adapter wraps that same native generation path in an
+item-oriented state machine. Regular models normalize input/output items into
+the chat template, media, reasoning, and function-parser pipeline. GPT-OSS
+models instead render and parse Harmony role/channel/recipient tokens; a
+recognized browser or Python recipient can execute a server-side tool and
+start another native generation turn. Background status, previous-response
+history, retrieval, and cancellation live in tokenizer-process memory, not in
+the scheduler or a durable store
+([create dispatcher](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/openai/serving_responses.py#L234-L558),
+[built-in loop](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/openai/serving_responses.py#L2531-L2604)).
+See [OpenAI Responses API](10-openai-responses.md) for input replay, state,
+tools, typed SSE events, usage, and the regular/Harmony guarantee differences.
+
 Embedding, classification, score, and rerank adapters use a second shared
 runtime branch. Most construct `EmbeddingReqInput`, which performs prefill and
 pooling without autoregressive decode; CausalLM scoring and decoder-only

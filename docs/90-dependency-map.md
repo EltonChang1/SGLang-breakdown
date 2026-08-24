@@ -193,6 +193,37 @@ extracts tools; the native runtime only executes the resulting generation
 request. See [OpenAI Completions and Chat
 Completions](08-openai-completions.md) for the complete flow.
 
+## OpenAI Responses dependency boundary
+
+Responses adds item normalization, local state, and two output protocols above
+the ordinary native generation path:
+
+```text
+ResponsesRequest -> regular item-to-chat conversion -> chat preparation
+                 \-> GPT-OSS Harmony messages/IDs -> Harmony context
+both -> GenerateReqInput -> shared native runtime -> context/output parsers
+     -> JSON, typed SSE, or background response store
+Harmony browser/python recipient -> tool session -> rerender -> another turn
+```
+
+| Component | Depends on | Supplies |
+| --- | --- | --- |
+| request/response protocol | OpenAI SDK item types, shared usage and grammar helpers | normalized request, native sampling, item-shaped response and usage serialization |
+| regular request branch | Responses item conversion, chat message/template/media preparation | prompt IDs/text, media arrays, stops, reasoning and tool grammar |
+| Harmony request branch | `openai_harmony`, model type, tool namespace descriptions | role/channel/recipient transcript and rendered token IDs |
+| conversation contexts | native result chunks, Harmony parser, optional tool sessions | accumulated messages, finish/usage state, rerendered continuation prompt |
+| state store | response ID, normalized messages, asyncio background task | local continuation, retrieval, status mutation, cancellation lookup |
+| regular stream state machine | decoded deltas, reasoning/function parsers, output mode | ordered item added/delta/done events and final snapshot |
+| Harmony stream state machine | output token IDs and Harmony parser state | analysis/final/built-in tool event families with weaker usage/error guarantees |
+| native/MCP tool layer | Exa or GPT-OSS tool object, external MCP SSE session | browser/Python tool message and another generation turn |
+
+Function tools are prompt/output protocol: the client executes them. Harmony
+browser and Python tools are server execution: their result re-enters the model
+loop. Accepted extended tools without either branch are validation-only. The
+local stores have no TTL, persistence, or cross-worker coordination. See
+[OpenAI Responses API](10-openai-responses.md) for the ordered flow and
+operational boundaries.
+
 ## Embedding and scoring dependency boundary
 
 The non-generation adapters share transport but not result semantics:

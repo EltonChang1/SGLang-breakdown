@@ -20,3 +20,7 @@ its exact status.
 - [Provider clients and templates](provider-clients-and-templates.md): OpenAI,
   Anthropic, LiteLLM, Vertex AI, and Crusoe adapters; all frontend template
   records and matchers; and the focused examples and manual tests.
+- [Diffusion generate CLI](diffusion-generate-cli.md): installed and secondary
+  dispatchers, server/sampling precedence, `DiffGenerator`, worker topology,
+  scheduler clients, output materialization/persistence, cleanup, and focused
+  unit/GPU tests.

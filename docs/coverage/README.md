@@ -24,14 +24,15 @@ The initial inventory contains 8,319 unique tracked paths:
 | Asset | 4 |
 | Generated | 2 |
 
-After the provider-client/template pass, 55 paths are `covered`, 16 are
-`partial`, 92 are justified `inventory-only`, and 8,156 remain `pending`.
-Small CLI, config-merging, argument-metadata, in-tree platform, offline-engine
-adapter, scoring, frontend IR/interpreter, tracing, choice-policy, SRT frontend
-HTTP adapter, provider backend, template-registry, provider-example, and
-focused manual-test files have complete references. Large shared schema,
-tokenizer, control, policy, runtime, and shared test-program files remain
-partial; a link to one symbol must not be mistaken for complete file coverage.
+After the diffusion-generate pass, 80 paths are `covered`, 24 are `partial`, 92
+are justified `inventory-only`, and 8,123 remain `pending`. Small CLI,
+config-merging, argument-metadata, in-tree platform, offline-engine adapter,
+scoring, frontend IR/interpreter, tracing, choice-policy, SRT frontend HTTP
+adapter, provider backend/template/example, diffusion generate/launch/client,
+output-helper, and focused test files have complete references. Large shared
+schema, tokenizer, control, policy, sampling, worker, pipeline-request,
+runtime, and mixed-purpose test files remain partial; a link to one symbol must
+not be mistaken for complete file coverage.
 
 ## Status meanings
 

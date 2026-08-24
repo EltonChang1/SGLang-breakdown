@@ -68,6 +68,34 @@ backend
 ([runtime endpoint generation](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/backend/runtime_endpoint.py#L159-L246),
 [offline generation adapter](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/engine.py#L362-L573)).
 
+## Diffusion offline dependency boundary
+
+The diffusion `generate` surface is a separate synchronous client over the
+`multimodal_gen` scheduler, not an SRT offline-engine mode:
+
+```text
+sglang CLI -> diffusion classification -> ServerArgs + sampling kwargs
+           -> DiffGenerator -> launch_server(no HTTP) -> GPU workers
+           -> SamplingParams -> expanded Req group -> SchedulerClient/ZMQ
+           -> output-rank persistence or returned payload -> GenerationResult
+```
+
+| Component | Depends on | Supplies |
+| --- | --- | --- |
+| root `cli.generate` | model path extraction, overlay/native/Diffusers detection | selected diffusion-only command |
+| diffusion CLI `generate_cmd` | server and sampling parsers, config loader, model registry | resolved launch record plus request kwargs |
+| `DiffGenerator` | launch/warmup, request helpers, synchronous scheduler client | single/list/none results and control methods |
+| `runtime.launch_server` | worker process entry, rank/node configuration, readiness pipes | local worker handles or a blocking server/role lifecycle |
+| `SchedulerClient` | DP endpoints, per-call ZMQ sockets, request/control types | routed ordinary response or all-replica control response |
+| `SamplingParams` + `Req` | model defaults, explicit user fields, pipeline validation | one validated request per prompt/output |
+| output-rank worker | pipeline output, request output settings, persistence helpers | saved paths with tensor/audio payload removed by default |
+| output helpers | Torch/NumPy, Pillow, imageio/FFmpeg, optional postprocessors | frames, images, video/audio, action JSON, and paths |
+
+Within-replica model/tensor/sequence parallelism belongs to worker execution;
+DP routing chooses an ingress replica above it. Control requests fan out to all
+DP replicas because weights, LoRA, memory, and shutdown state must agree. See
+[Diffusion Generate CLI](06-diffusion-generate-cli.md) for the ordered trace.
+
 ## Offline Engine dependency boundary
 
 The offline API removes the network protocol adapter but preserves the shared

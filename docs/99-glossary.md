@@ -46,10 +46,23 @@ not use `CP` as a generic synonym for tensor parallelism.
 a small number of new tokens per active request per step. In disaggregated mode,
 decode can be hosted by different workers from prefill.
 
+**DataType (diffusion).** The multimodal-generation request/output kind:
+`IMAGE`, `VIDEO`, `MESH`, or `ACTION`. It selects default filename extension
+and output materialization behavior; it is unrelated to a tensor's numeric
+dtype
+([enum](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/multimodal_gen/configs/sample/sampling_params.py#L81-L95)).
+
 **DetokenizerManager.** The process-side component that turns scheduler token
 outputs into incremental or final text and returns them to tokenizer-side
 request state. Its process entry is
 [`run_detokenizer_process`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/detokenizer_manager.py#L516-L539).
+
+**DiffGenerator.** The public synchronous Python client for the separate
+`sglang.multimodal_gen` runtime. Local mode launches diffusion workers without
+requiring HTTP; remote mode connects to scheduler endpoints. It prepares and
+expands media requests, returns `GenerationResult`, exposes LoRA/action
+controls, and owns client/worker cleanup
+([class](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/multimodal_gen/runtime/entrypoints/diffusion_generator.py#L68-L145)).
 
 **DP / data parallelism.** Multiple replicas or data-parallel ranks serving
 work. In the default launcher, `dp_size > 1` introduces a data-parallel
@@ -92,6 +105,12 @@ HTTP/gRPC request boundary but still launches the shared tokenizer, scheduler,
 detokenizer, IPC, and model-execution topology. "Offline" is a transport choice,
 not a promise of single-process execution. See
 [Offline Engine API](03-offline-engine.md).
+
+**Output-rank persistence (diffusion).** The default diffusion transport in
+which the worker output rank writes generated media and clears tensor/audio
+payloads before returning paths over ZMQ. It reduces serialization but means
+the path is interpreted in the worker's filesystem namespace
+([transport branch](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py#L610-L652)).
 
 **ProgramState.** The imperative handle passed as `s` to a decorated SGL
 function. It submits expressions, exposes named generated variables and
@@ -138,6 +157,12 @@ the exact cache-node and allocator invariants remain pending.
 tokenized work, admits and batches requests, invokes model execution, manages
 cache/scheduling state, and emits results. There can be multiple scheduler
 processes for parallel ranks.
+
+**SchedulerClient (diffusion).** The sync/async ZMQ client used by
+`sglang.multimodal_gen`. Ordinary requests select one DP ingress endpoint,
+realtime sessions stay affinity-pinned, and stateful control requests fan out
+to every replica. It is distinct from SRT tokenizer-to-scheduler transport
+([routing](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/multimodal_gen/runtime/scheduler_client.py#L117-L197)).
 
 **Scheduler readiness.** The parent-process handshake sent after a scheduler
 has constructed the model runtime and can report token limits and startup

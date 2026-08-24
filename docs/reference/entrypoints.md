@@ -90,6 +90,10 @@ runtime before it knows which command will run.
 the remaining arguments belongs to the selected command, so adding a global
 flag requires deciding whether it should be consumed here or forwarded.
 
+The `generate` branch is now followed completely through its separate
+diffusion runtime in the
+[diffusion generate CLI reference](diffusion-generate-cli.md).
+
 ## `python/sglang/cli/serve.py`
 
 **Purpose.** This file normalizes the serving request, chooses a serving

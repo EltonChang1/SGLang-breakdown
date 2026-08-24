@@ -64,6 +64,18 @@ request shapes, sampling losses, templates, credentials, retries, examples,
 and tests are in
 [Provider Clients and Prompt Templates](05-provider-clients-and-templates.md).
 
+The installed `sglang generate` branch enters neither the frontend language nor
+the SRT request path. It classifies a diffusion model, builds the separate
+multimodal-generation `ServerArgs` and model-specific `SamplingParams`, then
+constructs `DiffGenerator` in local mode
+([root wrapper](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/cli/generate.py#L6-L33),
+[`generate_cmd`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/multimodal_gen/runtime/entrypoints/cli/generate.py#L154-L206)).
+That offline generator starts one local worker per GPU, sends expanded
+image/video/mesh requests synchronously over ZMQ, and normally asks the output
+rank to save media and return file paths instead of tensors. See
+[Diffusion Generate CLI](06-diffusion-generate-cli.md) for the complete public
+flow, multi-node/DP boundary, output ownership, and cleanup behavior.
+
 The `sglang serve` command is a dispatcher, not just an alias for one server.
 It normalizes a positional model path, discovers installed serve backends,
 loads SGLang plugins, auto-detects a unique non-LLM match, and otherwise falls

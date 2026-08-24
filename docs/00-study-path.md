@@ -35,8 +35,13 @@ fork/join, choice scoring, tracing and prefix caching, and the first SRT HTTP
 handoff. [Provider Clients and Prompt Templates](05-provider-clients-and-templates.md)
 and its [file reference](reference/provider-clients-and-templates.md) compare
 OpenAI, Anthropic, LiteLLM, Vertex AI, and Crusoe, then audit every frontend
-template record, matcher, provider example, and focused manual test. The
-diffusion `generate` command is the remaining Phase 1 public surface.
+template record, matcher, provider example, and focused manual test. Finally,
+[Diffusion Generate CLI](06-diffusion-generate-cli.md) and its
+[file reference](reference/diffusion-generate-cli.md) trace the separate
+multimodal-generation surface through model detection, configuration,
+`DiffGenerator`, worker launch, request/output expansion, ZMQ routing,
+persistence, metrics, controls, and cleanup. Phase 1 is complete at the public
+boundary; deeper diffusion pipelines and models remain in Phase 7.
 
 Questions to answer before moving on:
 
@@ -53,6 +58,12 @@ Questions to answer before moving on:
   Jinja template make different decisions for the same model?
 - How do `RuntimeEndpoint`, local `Runtime`, and offline `Engine` differ in
   transport, process ownership, and return type?
+- Why is the active diffusion symbol `DiffGenerator`, and why is
+  `cli.utils.launch_distributed` not the installed command's launch path?
+- When does diffusion output persistence happen in the worker instead of the
+  offline client, and what crosses ZMQ in each branch?
+- How do within-replica model parallelism and data-parallel request routing
+  divide responsibility in the diffusion runtime?
 
 ## Phase 2: configuration and startup
 

@@ -32,7 +32,7 @@
 - Inventory: [`docs/coverage/inventory.csv`](docs/coverage/inventory.csv)
 - Policy and counts: [`docs/coverage/README.md`](docs/coverage/README.md)
 - Generator: [`scripts/build_coverage_inventory.py`](scripts/build_coverage_inventory.py)
-- Current statuses: 55 covered, 16 partial, 92 inventory-only, 8,156 pending.
+- Current statuses: 80 covered, 24 partial, 92 inventory-only, 8,123 pending.
 
 Every row includes a pinned source URL and category. Covered and partial rows
 link to their note. Inventory-only rows explain why line-by-line notes are not
@@ -40,63 +40,62 @@ useful. Pending rows state which future pass owns them.
 
 ## Completed in the latest run
 
-- Added [Provider Clients and Prompt Templates](docs/05-provider-clients-and-templates.md)
-  and its [file reference](docs/reference/provider-clients-and-templates.md).
-  They trace executor state into OpenAI, Anthropic, LiteLLM, Vertex AI, and
-  Crusoe; compare request shapes and lossy sampling conversions; and explain
-  credentials, retries, token usage, streaming, selection, API speculation,
-  media conversion, and failure behavior.
-- Completed `openai.py`, `anthropic.py`, `litellm.py`, `vertexai.py`,
-  `crusoe.py`, and `chat_template.py`. The template audit represents all 27
-  records and all 16 ordered model-path matchers, including four
-  explicit-only/fallback records and the automatically selected `janus-pro`
-  capitalized-`User` mismatch.
-- Covered 18 provider quick-start/usage examples and three manual test files.
-  Added an explicit partial boundary for the 14 shared functions in
-  `python/sglang/test/test_programs.py` reached by provider suites, and recorded
-  the absence of focused Anthropic, LiteLLM, and Vertex AI backend tests.
-- Documented non-obvious portability rules: OpenAI streaming forwards both
-  token-limit fields while ordinary generation selects one; `n > 1` stores a
-  list but advances the prompt with candidate zero; OpenAI selection ignores
-  the common choice policy; chat speculative state and usage counters are
-  unlocked backend-instance state; Anthropic removes the leading system
-  message from executor history; and Vertex's role-free image path passes a
-  base64 string to `Image.from_bytes` while message media is always labeled
-  JPEG.
-- Updated the architecture/study navigation, dependency map, glossary,
-  frontend cross-links, coverage policy/counts, inventory, and affected ledger
+- Added [Diffusion Generate CLI](docs/06-diffusion-generate-cli.md) and its
+  [file reference](docs/reference/diffusion-generate-cli.md). They trace the
+  installed and secondary dispatchers through diffusion model detection,
+  `ServerArgs`/model-specific `SamplingParams` precedence, `DiffGenerator`,
+  local/remote scheduler clients, worker launch, prompt/output expansion,
+  persistence, metrics, LoRA/action controls, and cleanup.
+- Completed the root generate wrapper/classifier, six-file diffusion CLI
+  package, package/server-args façades, `DiffGenerator`, entry-point output
+  helpers, launch dispatcher, and sync/async scheduler client. Added explicit
+  partial boundaries for CLI-reached sampling configuration, `Req`/`OutputBatch`,
+  GPU-worker output/entry symbols, and diffusion `ServerArgs`.
+- Explained that the active public symbol is `DiffGenerator`; the installed
+  command bypasses the secondary diffusion CLI `main`; worker-side saved-path
+  transport is the default; DP routing is separate from within-replica model
+  parallelism; and the unreferenced `launch_distributed` torchrun helper targets
+  a path absent from the pinned snapshot.
+- Covered ten focused test/harness files and partial slices of four
+  mixed-purpose tests. Recorded the absence of isolated tests for root
+  generate dispatch, config/CLI sampling precedence, malformed Diffusers JSON,
+  performance-report selection, all-groups-failed exit status, and the dead
+  torchrun helper.
+- Marked Phase 1's public-surface study complete while preserving deeper
+  diffusion sampling, managers, orchestrator, pipelines, models, caches, and
+  kernels for Phase 7. Updated architecture/study navigation, dependency map,
+  glossary, reference indexes, coverage policy/counts, inventory, and ledger
   rows.
 
 ## Validation in the latest run
 
 - Confirmed `.source/sglang` remained at the pinned commit with a clean worktree.
 - Rebuilt and checked the 8,319-row inventory; status totals match this file.
-- Validated local Markdown targets and anchors, coverage-note anchors, and 354
-  pinned source links and line ranges across the affected navigation and notes.
-- Ran focused AST/source checks proving the 27-record/16-matcher catalog is
-  exact, the four non-matcher records are identified, all 18 covered provider
-  examples match the ledger, the Janus role mismatch is source-backed, and the
-  documented provider sampling/state branches are present.
-- Parsed the five provider files, template registry, and three manual tests
-  without writing bytecode.
-- `git diff --check` passed. No model/server runtime test was attempted because
-  provider suites require live credentials, network access, and changing
-  external models; this run changes only study Markdown and ledger metadata.
+- Checked 204 local/coverage links and 217 pinned source links, including local
+  anchors, ledger note targets, tracked source paths, and source line ranges.
+- Parsed the 19 reached Python source files and checked the active dispatcher,
+  argument-precedence, output-transport, data-parallel control, dead-helper,
+  and exact 26-method `DiffGenerator` catalog claims against the pinned tree.
+- Attempted the focused diffusion unit tests, but collection stopped before any
+  test ran because the available Python environment lacks `orjson`.
+- No GPU/model end-to-end suite was attempted because those tests require
+  accelerator resources and model downloads; this run changes only study
+  Markdown and ledger metadata.
 
 ## Next coherent study unit
 
-Finish Phase 1 with the diffusion `generate` public surface. Start at
-`python/sglang/multimodal_gen/runtime/entrypoints/cli/main.py`, `generate.py`,
-`cli_types.py`, and `utils.py`; trace argument/config construction into
-`DiffusionGenerator`, output persistence, distributed launch behavior, and the
-focused CLI-generate tests. Keep the deeper diffusion managers, pipelines,
-models, and caches assigned to Phase 7.
+Begin Phase 3 with SRT's native `/generate` protocol. Trace
+`http_server.generate_request` through `GenerateReqInput` normalization,
+`srt/sampling/sampling_params.py`, tokenizer/media preparation, request-state
+correlation, scheduler messages, detokenizer output, SSE/non-streaming response
+shapes, disconnect/cancellation behavior, and focused native-API tests. Keep
+OpenAI, Anthropic, Ollama, gRPC, grammar/tool, and session adapters as the next
+ordered protocol subunits.
 
 ## Known gaps
 
-- The frontend provider clients and concrete lightweight chat-template catalog
-  are complete. The diffusion CLI and protocol-specific serving adapters are
-  not yet covered.
+- Phase 1 public surfaces are complete. Protocol-specific serving adapters and
+  their shared request-preparation machinery are the next gap.
 - The shared frontend test-program file is partial outside the provider-reached
   functions, and no focused Anthropic, LiteLLM, or Vertex AI backend tests are
   present in the pinned snapshot.
@@ -106,8 +105,12 @@ models, and caches assigned to Phase 7.
 - Request/control schemas and tokenizer/control manager files remain partial
   outside the methods exercised by the offline API; session-controller and
   weight/cache/model-worker internals retain their later subsystem passes.
+- Diffusion CLI, launch, client, and output helpers are complete; sampling
+  details, request/worker files outside the public slices, managers,
+  disaggregation protocols, pipelines, models, caches, and kernels remain for
+  Phase 7.
 - Scheduler admission/batching, radix/KV caches, model execution, model/layer
-  families, kernels, distributed/advanced modes, and diffusion internals remain.
+  families, kernels, and distributed/advanced SRT modes remain.
 - Rust crates, gateway, router, tests, benchmarks, examples, docs, packaging,
   deployment, CI, release, security, and operations need dedicated guides.
 - The current architecture trace names only the entry symbols in several large

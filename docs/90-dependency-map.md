@@ -9,7 +9,7 @@ subsystem guide.
 
 | Layer | Depends on | Supplies |
 | --- | --- | --- |
-| Frontend language and clients (`sglang.lang`) | Template/program state, HTTP-provider clients | User-facing generation primitives and backend requests |
+| Frontend language and clients (`sglang.lang`) | IR, interpreter state, chat templates, choice policies, HTTP/provider adapters | User-facing model programs and backend requests |
 | CLI (`sglang.cli`) | Packaging entry points, model metadata, plugin/serve-backend registries | A selected LLM, diffusion, or external serving launch |
 | Protocol entry points (`srt.entrypoints`) | FastAPI/ASGI, protocol schemas, templates, `TokenizerManager` | Native, OpenAI, Anthropic, Ollama, gRPC, and management surfaces |
 | Tokenizer side (`srt.managers.tokenizer_manager`) | Tokenizers, parsers, multimodal processors, request schemas, ZMQ | Validated tokenized requests and correlated client responses |
@@ -21,6 +21,41 @@ subsystem guide.
 The default startup path linking these layers is source-visible in
 [`launch_server`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/http_server.py#L2767-L2828)
 and [`Engine._launch_subprocesses`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/engine.py#L1022-L1237).
+
+## Frontend language dependency boundary
+
+The frontend is an imperative client orchestrator. Its main dependencies form
+this order:
+
+```text
+public factories -> SglFunction + expression IR -> ProgramState
+                 -> StreamExecutor -> BaseBackend implementation
+                 -> provider API or RuntimeEndpoint -> SRT HTTP /generate
+```
+
+| Frontend component | Depends on | Supplies |
+| --- | --- | --- |
+| `api.py` | IR factories and global config | decorators, generation/selection/role/media helpers |
+| `ir.py` | sampling schema, choice-policy protocol | decorated wrapper and typed expressions |
+| `interpreter.py` | IR, templates through backend, media encoders | ordered prompt/message/variable state and backend calls |
+| `tracer.py` | IR plus interpreter state interface | symbolic dependencies and leading static prefix |
+| `choices.py` | aligned conditional/unconditional logprobs | selected string and diagnostic metadata |
+| `BaseBackend` | chat template | minimum generation/stream/selection/optimization boundary |
+| `RuntimeEndpoint` | SRT HTTP endpoints | concrete frontend backend for a running SGLang server |
+| `Runtime` | resolved `ServerArgs`, spawned HTTP server, endpoint | owning local convenience wrapper for frontend programs |
+
+The Python program thread enqueues expressions; the executor worker mutates
+prompt state and calls the backend. Named variable events join those lanes when
+user Python reads a model result. Batch execution adds a thread pool outside
+that per-program pair. See [Frontend Language Execution](04-frontend-language.md)
+for the ordered single, batch, stream, choice, fork, and trace flows.
+
+`RuntimeEndpoint` is where this frontend first meets SRT: it serializes the
+accumulated prompt and sampling record to `/generate`. The offline `Engine`
+instead calls tokenizer-manager coroutines directly and is not a frontend
+backend
+([runtime endpoint generation](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/backend/runtime_endpoint.py#L159-L246),
+[offline generation adapter](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/engine.py#L362-L573)).
 
 ## Offline Engine dependency boundary
 

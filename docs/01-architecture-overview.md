@@ -51,6 +51,16 @@ The installed package exposes three broad ways in:
    The complete Python API and control boundary is traced in
    [Offline Engine API](03-offline-engine.md).
 
+The frontend-language branch is itself a client-side execution layer.
+`@sgl.function` wraps a Python function; `ProgramState` submits typed
+expressions to `StreamExecutor`; that executor owns prompt, message, variable,
+media, and streaming state and calls a selected `BaseBackend`
+([`run_program`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/interpreter.py#L57-L90),
+[`StreamExecutor`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/interpreter.py#L274-L340)).
+Its `RuntimeEndpoint` backend reaches an SRT server through `/generate`; other
+backends can reach providers instead. The complete client-side flow is in
+[Frontend Language Execution](04-frontend-language.md).
+
 The `sglang serve` command is a dispatcher, not just an alias for one server.
 It normalizes a positional model path, discovers installed serve backends,
 loads SGLang plugins, auto-detects a unique non-LLM match, and otherwise falls
@@ -200,3 +210,5 @@ text cannot stall accelerator scheduling.
   disconnect are cleaned up.
 - Name the two different ways Rust participates in the serving path: replacing
   the Python server or adding native gRPC beside it.
+- Trace a frontend `sgl.gen` from the program thread through the executor
+  worker and backend, then explain where that path first meets SRT.

@@ -28,8 +28,12 @@ Study the installed `sglang` package, the frontend language, the offline
 backend extension contract. The [Offline Engine API](03-offline-engine.md) and
 its [file reference](reference/offline-engine.md) now cover the in-process
 constructor, sync/async inference surfaces, request handoff, sessions, scoring,
-control methods, weight updates, and shutdown. The frontend DSL, client
-backends, and diffusion `generate` command remain to be written.
+control methods, weight updates, and shutdown. [Frontend Language Execution](04-frontend-language.md)
+and its [file reference](reference/frontend-language.md) now trace decorated
+functions through sampling IR, interpreter state, single/batch/stream modes,
+fork/join, choice scoring, tracing and prefix caching, and the first SRT HTTP
+handoff. Provider clients, the complete chat-template catalog, and the
+diffusion `generate` command remain to be written.
 
 Questions to answer before moving on:
 
@@ -38,6 +42,10 @@ Questions to answer before moving on:
   installed third-party backend?
 - How does the offline `Engine` differ from the HTTP server without becoming a
   separate inference core?
+- Which thread runs user Python, which thread evaluates expressions, and what
+  event makes a generated variable safe to read?
+- How do `RuntimeEndpoint`, local `Runtime`, and offline `Engine` differ in
+  transport, process ownership, and return type?
 
 ## Phase 2: configuration and startup
 

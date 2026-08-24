@@ -14,3 +14,6 @@ its exact status.
 - [Offline Engine](offline-engine.md): base contract, constructor and event-loop
   boundary, generation/embedding/scoring adapters, sessions, runtime controls,
   weight updates, LoRA, request schemas, and tokenizer-side fan-out.
+- [Frontend language](frontend-language.md): public factories, sampling IR,
+  interpreter state and concurrency, fork/join, choice policies, tracing and
+  prefix caching, the backend contract, and the SRT HTTP runtime endpoint.

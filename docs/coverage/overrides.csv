@@ -3,6 +3,15 @@ README.md,partial,docs/01-architecture-overview.md#what-is-in-this-snapshot,Prod
 python/pyproject.toml,partial,docs/reference/entrypoints.md#pythonpyprojecttoml,Entry points and Rust-extension packaging are covered; the full dependency and platform packaging matrix remains pending.
 python/setup.py,partial,docs/reference/entrypoints.md#pythonsetuppy,Rust extension discovery and filtering are covered; remaining build failure cases await the packaging guide.
 python/sglang/__init__.py,covered,docs/reference/entrypoints.md#pythonsglang__init__py,Public exports and import-time side effects are explained.
+python/sglang/lang/api.py,covered,docs/reference/frontend-language.md#pythonsglanglangapipy,Every public frontend factory backend helper role media and reasoning constructor is explained.
+python/sglang/lang/global_config.py,covered,docs/reference/frontend-language.md#pythonsglanglangglobal_configpy,All mutable frontend settings their consumers and process-wide concurrency boundary are explained.
+python/sglang/lang/ir.py,covered,docs/reference/frontend-language.md#pythonsglanglangirpy,Sampling conversions decorated program behavior and every frontend expression type are explained.
+python/sglang/lang/interpreter.py,covered,docs/reference/frontend-language.md#pythonsglanglanginterpreterpy,Single batch streaming queue state expression fork join error and lifecycle behavior are explained.
+python/sglang/lang/choices.py,covered,docs/reference/frontend-language.md#pythonsglanglangchoicespy,The decision protocol and all built-in conditional greedy and unconditional-normalized policies are explained.
+python/sglang/lang/tracer.py,covered,docs/reference/frontend-language.md#pythonsglanglangtracerpy,Full tracing prefix extraction symbolic dependency fork scope and concurrency behavior is explained.
+python/sglang/lang/chat_template.py,partial,docs/reference/frontend-language.md#pythonsglanglangchat_templatepy,The template record registry selection role semantics and interpreter boundary are covered; the 27 concrete templates and 16 model matchers await a model-family catalog audit.
+python/sglang/lang/backend/base_backend.py,covered,docs/reference/frontend-language.md#pythonsglanglangbackendbase_backendpy,Every declared hook default capability and mismatch with the interpreter's observed protocol is explained.
+python/sglang/lang/backend/runtime_endpoint.py,covered,docs/reference/frontend-language.md#pythonsglanglangbackendruntime_endpointpy,The complete SRT HTTP adapter choice flow server-owning Runtime helper methods errors and lifecycle are explained.
 python/sglang/cli/main.py,covered,docs/reference/entrypoints.md#pythonsglangclimainpy,The complete top-level CLI dispatcher is explained.
 python/sglang/cli/serve.py,covered,docs/reference/entrypoints.md#pythonsglangcliservepy,The complete serve-backend selection and cleanup path is explained.
 python/sglang/cli/serve_backends.py,covered,docs/reference/entrypoints.md#pythonsglangcliserve_backendspy,The backend extension contract discovery validation and fallback behavior are explained.

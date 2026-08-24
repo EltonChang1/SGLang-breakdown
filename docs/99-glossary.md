@@ -3,10 +3,17 @@
 Definitions here describe usage in the pinned SGLang snapshot, not every use of
 the term in the wider ML ecosystem.
 
-**Backend.** Context-dependent term. A serve backend is an LLM, diffusion, or
-installed external launcher implementing `ServeBackend`; an attention, kernel,
-quantization, or communication backend is an implementation selected inside
-the runtime. Always name the kind.
+**Backend.** Context-dependent term. A *frontend backend* implements the
+`BaseBackend` generation/stream/selection boundary for an SGL program; a serve
+backend is an LLM, diffusion, or installed external launcher implementing
+`ServeBackend`; an attention, kernel, quantization, or communication backend is
+an implementation selected inside the runtime. Always name the kind.
+
+**Choice policy.** A frontend callable that chooses among complete candidate
+strings from their conditional token logprobs and, optionally, unconditional
+logprobs. Built-ins use token-length normalization, greedy token comparison, or
+unconditional-likelihood normalization
+([policy interface](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/choices.py#L8-L29)).
 
 **Continuous batching.** Scheduling requests into changing batches as work
 arrives and existing requests finish, rather than holding a static batch for
@@ -47,6 +54,17 @@ schedulers from the tokenizer process.
 routing/communication across ranks. SGLang separately tracks expert, expert
 data, and expert tensor ranks.
 
+**Frontend language.** The client-side `sglang.lang` programming layer. It runs
+ordinary Python around typed SGL expressions and delegates model operations to
+a frontend backend. It is an orchestrator above remote inference, not the SRT
+scheduler or model loop. See [Frontend Language Execution](04-frontend-language.md).
+
+**Frontend IR.** The `SglExpr` hierarchy representing text, generation,
+selection, roles, media, variables, scopes, forks, and optimization markers.
+The interpreter consumes it incrementally; tracing links the same nodes into a
+symbolic dependency graph
+([IR definitions](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/ir.py#L327-L643)).
+
 **IPC.** Inter-process communication. The default engine uses ZMQ endpoints
 carried by `PortArgs`; local mode primarily uses `ipc://` files, while some
 distributed modes derive TCP addresses
@@ -61,6 +79,12 @@ HTTP/gRPC request boundary but still launches the shared tokenizer, scheduler,
 detokenizer, IPC, and model-execution topology. "Offline" is a transport choice,
 not a promise of single-process execution. See
 [Offline Engine API](03-offline-engine.md).
+
+**ProgramState.** The imperative handle passed as `s` to a decorated SGL
+function. It submits expressions, exposes named generated variables and
+metadata, builds role/scope contexts, streams text, and creates fork groups. Its
+`StreamExecutor` owns the mutable prompt and synchronization state
+([class](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/interpreter.py#L852-L1042)).
 
 **PP / pipeline parallelism.** Splitting model stages across ranks. The launcher
 creates scheduler processes over PP and TP rank ranges; pipeline mode selects
@@ -86,6 +110,12 @@ IDs are generated during normalization; IDs within a batch and IDs already in
 flight must be unique
 ([normalization](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/io_struct.py#L345-L395),
 [state guard](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/tokenizer_manager.py#L3358-L3395)).
+
+**Runtime / RuntimeEndpoint.** `RuntimeEndpoint` is the frontend backend for an
+already-running SRT HTTP server. `Runtime` owns a spawned local HTTP server and
+exposes such an endpoint. Neither is the offline `Engine`, which bypasses HTTP
+between its Python methods and tokenizer manager
+([endpoint and wrapper](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/backend/runtime_endpoint.py#L26-L555)).
 
 **RadixAttention.** SGLang's prefix-sharing approach built around a radix-tree
 view of reusable KV-backed token prefixes. This is an architectural term here;
@@ -118,6 +148,12 @@ modes, and operations.
 the common HTTP/offline topology. It owns request normalization/state,
 tokenization and media preparation, scheduler dispatch, cancellation, and
 response correlation.
+
+**Token healing.** Re-evaluating a small suffix of an existing prompt so a
+candidate can share or complete the prompt's final tokenization correctly. The
+frontend runtime choice path starts logprobs up to two prompt tokens back and
+removes an unchanged healed token before comparing candidates
+([choice path](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/lang/backend/runtime_endpoint.py#L257-L293)).
 
 **TP / tensor parallelism.** Splitting tensor/model computation across ranks.
 The launcher maps local GPU IDs and spawns scheduler processes for TP/PP rank

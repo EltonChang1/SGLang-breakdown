@@ -6,7 +6,8 @@
 2. [Architecture overview](01-architecture-overview.md)
 3. [Serving entry points](reference/entrypoints.md)
 4. [Offline Engine API](03-offline-engine.md)
-5. [Configuration and startup](02-configuration-and-startup.md)
+5. [Frontend Language Execution](04-frontend-language.md)
+6. [Configuration and startup](02-configuration-and-startup.md)
 
 ## Cross-cutting references
 

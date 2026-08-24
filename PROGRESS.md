@@ -3,7 +3,7 @@
 ## Source snapshot
 
 - Repository: `EltonChang1/sglang`
-- Analyzed commit: _not recorded yet_
+- Analyzed commit: `f464e77d17a3908ad0ea32547b1e8b039bcbd354`
 - Last completed run: _not started_
 
 ## Completion rules
@@ -26,4 +26,3 @@
 - [ ] Create the architecture map and study sequence.
 - [ ] Work through each subsystem and file in a stable order.
 - [ ] Audit coverage and resolve missing or shallow areas.
-

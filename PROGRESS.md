@@ -92,30 +92,35 @@ useful. Pending rows state which future pass owns them.
 - Regenerated the 8,319-row inventory and passed the generator's `--check`;
   status counts are 162 covered, 37 partial, 92 inventory-only, and 8,028
   pending.
-- Audited all 32 study Markdown files: 177 local links/images, 1,349 pinned
+- Audited all 32 study Markdown files: 177 local links/images, 1,350 pinned
   source links and line ranges, and all 199 covered/partial ledger note targets
   resolve with no errors.
 - AST-parsed all four dedicated Ollama modules plus the shared HTTP server and
-  checked 34 central records, classes, methods, functions, routes, and all five
-  route environment keys. An isolated import/default assertion pass for the
-  protocol records also succeeded.
+  checked 34 named records, classes, methods, functions, and routes, plus all
+  five route environment keys. An isolated import/default assertion pass for
+  the protocol records also succeeded.
 - Attempted the focused CPU Anthropic unit suite directly. Import stopped at
   missing `orjson` before test discovery, so no test cases ran. The broad,
   tool-use, and manual VLM suites were not run because they launch model
   servers; VLM also downloads external fixtures.
 - The snapshot has no dedicated Ollama schema, handler, route, or smart-router
-  tests. The current environment also lacks `orjson`, so runtime handler import
-  and live Ollama-client/model validation were not available; source, AST,
-  protocol-model, link, and ledger checks define this pass's validation floor.
+  tests. A first isolated handler import stopped at missing `orjson`; retrying
+  with only its serializer stubbed exercised the real adapter code and verified
+  option/chat conversion, empty generation, terminal and incremental stream
+  gaps, and synthetic metadata. A fake Ollama client verified judge truncation,
+  force precedence, fallback, and raw streaming. No live CLI/model validation
+  or ASGI disconnect test was available.
 - The inventory check and `git diff --check` passed. No GPU/model server was
   available for live integration validation.
 
 ## Next coherent study unit
 
-Continue Phase 3 with Python and native gRPC entry points and their protocol
-boundary. Trace bridge/server startup, runtime handoff, streaming, generated
-records, cancellation/errors, configuration, tests, and deployment behavior.
-Then cover parser and session subunits.
+Continue Phase 3 by mapping the distinct gRPC boundaries before assigning
+coverage: Python's native bridge/sidecar and legacy SMG server, the shared
+runtime proto and Rust extension, the model gateway's gRPC router, and the
+separate image-only EPD encoder transport. Complete the Python request bridge
+and its focused unit test first without treating the larger Rust/gateway and
+encoder subsystems as one adapter. Then cover parser and session subunits.
 
 ## Known gaps
 
@@ -127,10 +132,12 @@ Then cover parser and session subunits.
   images; implement format/thinking/template/suffix/context/keep-alive/raw
   semantics; expose embedding; translate native finish/error/usage details;
   or support incremental native streaming correctly. A terminal native chunk
-  can lose text, tags/show metadata are synthetic, and there are no focused
-  tests. `SmartRouter` has heuristic prompt classification, synchronous calls,
-  one full-response fallback, no stream fallback, and no policy guard against
-  replaying sensitive or side-effecting requests to the other endpoint.
+  can lose text, explicit stream-abort cleanup is absent, tags/show metadata
+  are synthetic, and there are no focused tests. `SmartRouter` has heuristic
+  prompt classification, synchronous calls, one full-response fallback, no
+  stream fallback, possible configured-versus-served model misattribution, and
+  no policy guard against replaying sensitive or side-effecting requests to
+  the other endpoint.
 - The shared frontend test-program file is partial outside the provider-reached
   functions, and no focused Anthropic, LiteLLM, or Vertex AI backend tests are
   present in the pinned snapshot.

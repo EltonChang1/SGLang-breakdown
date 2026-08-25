@@ -37,9 +37,9 @@ The repository had 18 commits at this run's start. They record initialization,
 source pinning, architecture/inventory, configuration/startup, offline engine,
 frontend execution, provider clients/templates, diffusion CLI, native generate,
 OpenAI completion/chat, embedding/scoring, Responses, Anthropic Messages, and
-Ollama. The current native-gRPC and final-report deliverables are intended as
-the nineteenth commit; because this file is part of that commit, its own SHA
-cannot be embedded without changing it.
+Ollama. Native gRPC plus the first final audit was published as `ffb34a6`, the
+nineteenth commit. The containing push-status refresh is the twentieth commit;
+its own SHA cannot be embedded without changing it.
 
 Substantive study sequence:
 
@@ -58,7 +58,8 @@ Substantive study sequence:
 | Embedding/scoring plus audit corrections | `df53771`, `7eda429`, `9c056b5` |
 | OpenAI Responses | `22de6a6` |
 | Anthropic and Ollama plus validation corrections | `e8ac56f`, `70ed366`, `18ff9ea` |
-| Native gRPC Python bridge and this report | containing commit |
+| Native gRPC Python bridge and first final audit | `ffb34a6` |
+| Final push-status refresh | containing commit |
 
 ## Coverage inventory
 
@@ -163,7 +164,7 @@ Final pre-commit results:
 | Focused Python test | Did not run: retry stopped at missing `orjson` during package import. |
 | Rust crate tests / live Tonic / model server | Not run in this environment. |
 | Final source SHA/cleanliness and repository diff review | Passed: exact SHA, clean source, useful study-repository changes only. |
-| Push to public `origin/main` | Pending. |
+| Push to public `origin/main` | Passed: `ffb34a6` published; the containing report refresh is the final public `main` tip. |
 
 The first test attempt used `python -m unittest` with a non-package path and
 failed to locate `test.registered`. The direct-file retry was the valid

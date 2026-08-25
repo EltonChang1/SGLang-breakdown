@@ -9,6 +9,21 @@ backend is an LLM, diffusion, or installed external launcher implementing
 `ServeBackend`; an attention, kernel, quantization, or communication backend is
 an implementation selected inside the runtime. Always name the kind.
 
+**Anthropic content block.** The typed unit inside an Anthropic message or
+stream, such as text, thinking, or tool use. In Python SRT the Messages adapter
+translates input blocks to OpenAI chat parts and reconstructs output blocks from
+OpenAI semantic chunks. A stream owns indexed start/delta/stop lifecycles per
+block; a block is not a scheduler request or a Responses output item
+([stream state](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/anthropic/serving.py#L838-L939)).
+
+**Anthropic serving adapter.** The tokenizer-process compatibility layer behind
+`/v1/messages` and `/v1/messages/count_tokens`. It converts Anthropic records
+to `ChatCompletionRequest`, delegates model-facing work to
+`OpenAIServingChat`, and converts full or streamed output back to Anthropic
+shape. It is distinct from the `sglang.lang` Anthropic provider client and does
+not execute Anthropic built-in server tools. See
+[Anthropic-Compatible Messages API](11-anthropic-messages.md).
+
 **Choice policy.** A frontend callable that chooses among complete candidate
 strings from their conditional token logprobs and, optionally, unconditional
 logprobs. Built-ins use token-length normalization, greedy token comparison, or
@@ -132,6 +147,20 @@ the scoring positions
 ([packing](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/tokenizer_manager_score_mixin.py#L68-L87),
 [result processing](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/tokenizer_manager_score_mixin.py#L110-L190)).
 
+**NDJSON.** Newline-delimited JSON: one complete JSON object per line. The
+Ollama stream adapter uses `application/x-ndjson`, unlike native/OpenAI/
+Anthropic server-sent events; it ends with a record whose `done` is true rather
+than an SSE `[DONE]` sentinel
+([chat stream](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/ollama/serving.py#L132-L171)).
+
+**Ollama serving adapter.** The tokenizer-process compatibility layer behind
+the configurable chat, generate, tags, and show routes. It directly builds
+native generation requests, exposes only a subset of its declared request
+fields, and advertises synthetic model metadata. It is distinct from both the
+real Ollama server and SGLang's client-side `SmartRouter`; this snapshot has no
+Ollama embedding route. See [Ollama-Compatible API and Smart
+Router](12-ollama-api-and-smart-router.md).
+
 **Offline Engine.** The in-process `sglang.Engine` Python API. It avoids an
 HTTP/gRPC request boundary but still launches the shared tokenizer, scheduler,
 detokenizer, IPC, and model-execution topology. "Offline" is a transport choice,
@@ -160,6 +189,13 @@ code-interpreter work. Regular streaming owns an added/delta/done lifecycle
 per item and builds the final response from items closed in wire order; it is
 not a chat-completion choice
 ([regular stream state](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/openai/serving_responses.py#L1997-L2215)).
+
+**Smart Router (Ollama package).** A synchronous client utility that asks an
+Ollama-served judge to classify a prompt, then calls local Ollama or a remote
+SGLang Ollama-compatible endpoint. Full responses get one opposite-destination
+fallback; streams do not. It is a heuristic demo, not an SRT request router,
+scheduler policy, or security boundary
+([class](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/ollama/smart_router.py#L23-L241)).
 
 **Output-rank persistence (diffusion).** The default diffusion transport in
 which the worker output rank writes generated media and clears tensor/audio

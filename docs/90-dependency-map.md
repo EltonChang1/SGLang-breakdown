@@ -193,6 +193,71 @@ extracts tools; the native runtime only executes the resulting generation
 request. See [OpenAI Completions and Chat
 Completions](08-openai-completions.md) for the complete flow.
 
+## Anthropic Messages dependency boundary
+
+The Anthropic adapter is stacked on the chat adapter rather than beside the
+native runtime:
+
+```text
+Anthropic request -> content/system/tool/reasoning conversion
+                  -> ChatCompletionRequest -> OpenAIServingChat
+                  -> GenerateReqInput -> shared native runtime
+OpenAI full response/chunks -> Anthropic blocks -> JSON or Anthropic SSE
+```
+
+| Component | Depends on | Supplies |
+| --- | --- | --- |
+| Anthropic protocol records | Pydantic discriminators and SDK-compatible field shapes | typed messages, content/tool/thinking blocks, responses, and stream events |
+| request converter | active chat template, OpenAI chat records, reasoning-history helpers | ordered chat messages, sampling, custom tools, reasoning intent |
+| inline-system probe | sandboxed Jinja render and tokenizer chat template | cached merge-versus-preserve decision for system turns |
+| `OpenAIServingChat` | templates/encoders, media formatter, reasoning and tool parsers, tokenizer manager | native request plus OpenAI full or streamed semantic output |
+| full response adapter | OpenAI choice, reasoning, parsed tool calls, usage | Anthropic thinking/text/tool blocks, stop reason, partitioned usage |
+| Anthropic stream state machine | OpenAI SSE chunks and continuous usage | balanced indexed thinking/tool/text block events and terminal message events |
+| token-count route | request converter and chat `_process_messages` | rendered-token length without scheduler or model execution |
+
+Custom function tools remain client-executed protocol. Anthropic built-in tool
+families are validated then skipped, so they do not reach either the Responses
+server-tool loop or an Anthropic-specific executor. The adapter accepts more
+fields than it implements and does not populate signatures, pings,
+cache-creation usage, or matched stop sequences. See
+[Anthropic-Compatible Messages API](11-anthropic-messages.md) for the ordered
+flow and failure boundaries.
+
+## Ollama API and Smart Router dependency boundary
+
+The Ollama server adapter bypasses the OpenAI semantic chat layer and reaches
+the native runtime directly:
+
+```text
+chat messages -> tokenizer chat template -> input IDs --\
+                                                      +-> GenerateReqInput
+generate prompt -> optional plain system prefix -> text-/        |
+                                                               v
+                                      shared native runtime -> result dict
+                                                               |
+                                                     JSON or NDJSON
+
+SmartRouter -> local judge -> local Ollama or remote SGLang Ollama endpoint
+```
+
+| Component | Depends on | Supplies |
+| --- | --- | --- |
+| Ollama protocol records | Pydantic and permissive option dictionaries | chat/generate/tags/show request and response shapes, but no embed/tool/error records |
+| route block | import-time environment variables and FastAPI app state | optional Ollama root plus configurable chat/generate/tags/show ingress |
+| chat converter | active tokenizer default chat template and text-only role/content messages | prompt IDs and one native generation request |
+| generate converter | prompt, optional literal system prefix, mapped options | text and one native generation request, or scheduler-free empty response |
+| NDJSON shaper | default cumulative native text and finish metadata | newline-framed deltas plus empty terminal record |
+| tags/show helpers | served name, request label, active context length | synthetic discovery/detail placeholders |
+| Smart Router | synchronous Ollama clients and model judge output | chosen local/remote call; one full-response fallback but no stream fallback |
+
+Only eight sampling options cross the boundary. Format, thinking, images,
+template, suffix, context, lifetime, raw mode, and request-side model selection
+do not. The stream shaper assumes cumulative output, discards terminal text,
+and has no Ollama error/cancellation layer. The adjacent Smart Router reports
+configured labels even though remote SGLang executes its one loaded model. See
+[Ollama-Compatible API and Smart
+Router](12-ollama-api-and-smart-router.md) for the full flow and test gaps.
+
 ## OpenAI Responses dependency boundary
 
 Responses adds item normalization, local state, and two output protocols above

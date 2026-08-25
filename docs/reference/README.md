@@ -36,3 +36,10 @@ its exact status.
 - [OpenAI Responses](openai-responses.md): item/chat/Harmony normalization,
   response state and continuation, function and built-in tools, ordinary and
   typed-stream output, Exa/MCP integration, documentation, and focused tests.
+- [Anthropic Messages](anthropic-messages.md): wire records; system, media,
+  thinking, tool, and usage conversion onto OpenAI chat; Anthropic block SSE;
+  token counting; errors; documentation; and focused/live test boundaries.
+- [Ollama API and Smart Router](ollama-api-and-smart-router.md): complete
+  Ollama package records, direct native handoff, NDJSON, synthetic model
+  metadata, route overrides, client-side judging/fallback, docs, and the
+  explicit absence of embedding and focused tests.

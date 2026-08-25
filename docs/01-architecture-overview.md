@@ -209,6 +209,34 @@ the scheduler or a durable store
 See [OpenAI Responses API](10-openai-responses.md) for input replay, state,
 tools, typed SSE events, usage, and the regular/Harmony guarantee differences.
 
+Anthropic-compatible Messages adds no independent runtime branch. Its adapter
+normalizes Anthropic system/content/thinking/tool records into
+`ChatCompletionRequest`, delegates model-facing preparation and native work to
+`OpenAIServingChat`, then converts the resulting full response or OpenAI stream
+into Anthropic content blocks. The stream adapter owns one outer message and
+one open indexed content block at a time; the scheduler never sees Anthropic
+events
+([request conversion](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/anthropic/serving.py#L229-L733),
+[stream state](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/anthropic/serving.py#L838-L1257)).
+Built-in Anthropic tools do not become a server tool loop in this path; only
+custom functions reach chat tool parsing. See [Anthropic-Compatible Messages
+API](11-anthropic-messages.md) for system-placement, reasoning-history, usage,
+token-count, and compatibility boundaries.
+
+Ollama compatibility takes a narrower direct route. Chat drops message images,
+applies the loaded tokenizer's default chat template immediately, and submits
+IDs; generate optionally prefixes plain system text and submits a string. Both
+construct `GenerateReqInput` without OpenAI chat preparation, then turn native
+results into JSON or NDJSON. Tags and show are synthetic advertisements rather
+than a model registry, and the snapshot has no Ollama embedding route
+([adapter](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/ollama/serving.py#L31-L349),
+[routes](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/http_server.py#L1954-L1997)).
+The same package's Smart Router is a synchronous client demo, not a server
+branch: a local judge selects local Ollama or remote SGLang, full responses get
+one opposite-side fallback, and streams do not. See [Ollama-Compatible API and
+Smart Router](12-ollama-api-and-smart-router.md) for the exact schema/execution,
+streaming, metadata, cancellation, and routing boundaries.
+
 Embedding, classification, score, and rerank adapters use a second shared
 runtime branch. Most construct `EmbeddingReqInput`, which performs prefill and
 pooling without autoregressive decode; CausalLM scoring and decoder-only

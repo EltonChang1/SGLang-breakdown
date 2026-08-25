@@ -12,6 +12,9 @@
 8. [Native `/generate` Protocol](07-native-generate-protocol.md)
 9. [OpenAI Completions and Chat Completions](08-openai-completions.md)
 10. [Embeddings, Classification, Scoring, Reranking, and Tokenization](09-openai-embeddings-and-scoring.md)
+11. [OpenAI Responses API](10-openai-responses.md)
+12. [Anthropic-Compatible Messages API](11-anthropic-messages.md)
+13. [Ollama-Compatible API and Smart Router](12-ollama-api-and-smart-router.md)
 
 ## Cross-cutting references
 

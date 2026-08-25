@@ -120,6 +120,23 @@ reasoning and function items, server-executed browser/Python loops, regular and
 Harmony SSE state machines, usage/errors, operational trust boundaries, and
 focused test gaps.
 
+[Anthropic-Compatible Messages API](11-anthropic-messages.md), with its [file
+reference](reference/anthropic-messages.md), then traces the Messages adapter
+onto the shared OpenAI chat path. It covers discriminated wire records,
+template-dependent system placement, media and reasoning history, custom and
+deferred tools, non-streaming output, indexed content-block SSE, usage and
+errors, preparation-only token counting, Claude Code documentation, and exact
+schema-versus-behavior gaps.
+
+[Ollama-Compatible API and Smart Router](12-ollama-api-and-smart-router.md),
+with its [file reference](reference/ollama-api-and-smart-router.md), covers the
+smaller direct-to-native adapter and the separate client utility. It traces
+chat-template IDs and generate text into `GenerateReqInput`, the eight-option
+sampling map, empty initialization response, full and NDJSON output, synthetic
+tags/show metadata, import-time route overrides, missing embedding surface,
+streaming correctness gaps, and the Smart Router's judge, force, fallback, and
+interactive-demo behavior.
+
 Questions to answer before continuing:
 
 - Why does `n > 1` become multiple independent request IDs rather than one
@@ -150,6 +167,26 @@ Questions to answer before continuing:
   the client, and which can execute another model turn inside SGLang?
 - Why do regular and Harmony Responses streams have different item, usage,
   error, and logprob guarantees?
+- Why does the Anthropic endpoint translate through `OpenAIServingChat` rather
+  than create a native generation request directly?
+- Which templates preserve an inline system turn, and when must the adapter
+  merge it into the leading system prompt?
+- How do thinking, text, and consecutive tool calls become balanced indexed
+  Anthropic content blocks over an OpenAI chunk stream?
+- Which Anthropic fields and built-in tools validate but do not affect local
+  execution, usage, or response shaping?
+- Why can `/v1/messages/count_tokens` be exact for rendered text yet fail to
+  prove the scheduler-visible multimodal token count?
+- Why does Ollama chat pre-tokenize to `input_ids` while Ollama generate sends
+  `text`, and which richer OpenAI chat behaviors does that direct path bypass?
+- Which Ollama request fields validate but never affect execution, and why is
+  `/api/embed` an absent route rather than an untraced adapter branch?
+- Why does Ollama NDJSON work with default cumulative native output but break
+  with incremental output, and when can its terminal record lose final text?
+- How can `/api/show` combine an unserved requested name with the active
+  checkpoint's context length, and why is `/api/tags` not a model store?
+- Why does Smart Router full-response fallback not imply streaming fallback,
+  and why must its judge not be treated as a policy enforcement boundary?
 
 ## Phase 4: scheduling and cache ownership
 

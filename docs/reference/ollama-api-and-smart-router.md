@@ -55,7 +55,7 @@ serializes the full response record, including null optional fields.
 | [68-103](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/ollama/serving.py#L68-L103) | `handle_chat` | Drop message images, render the raw tokenizer chat template to IDs, construct native generation |
 | [105-132](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/ollama/serving.py#L105-L132) | `_generate_chat_response` | Consume the first full native result and shape text, nanosecond duration, and token counts |
 | [134-170](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/ollama/serving.py#L134-L170) | `_stream_chat_response` | Convert assumed-cumulative native text to NDJSON deltas and an empty hard-coded terminal record |
-| [173-220](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/ollama/serving.py#L173-L220) | `handle_generate` | Concatenate system/raw prompt, short-circuit blanks, construct native text generation |
+| [173-220](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/ollama/serving.py#L173-L220) | `handle_generate` | Concatenate system and prompt text, short-circuit blanks, construct native text generation |
 | [222-249](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/ollama/serving.py#L222-L249) | `_generate_generate_response` | Shape the first full native result like full chat without a message wrapper |
 | [251-287](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/ollama/serving.py#L251-L287) | `_stream_generate_response` | Apply the same prefix slicing and terminal behavior to generated text |
 | [289-308](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/ollama/serving.py#L289-L308) | `get_tags` | Report one loaded model with zero size, unknown parameters, and a fixed digest |
@@ -76,6 +76,10 @@ Input validation, scheduling, detokenization, cancellation, and pending-state
 cleanup remain shared `GenerateReqInput`/`TokenizerManager` responsibilities.
 Those broader modules remain partial in the inventory rather than being marked
 complete through this adapter pass.
+
+The stream helpers add no adapter-owned abort task or generator-finally abort.
+Manager wait timeouts can inspect the raw request, but prompt scheduler
+cancellation after ASGI closes body iteration remains an untested boundary.
 
 <a id="pythonsglangsrtentrypointsollamasmart_routerpy"></a>
 
@@ -98,6 +102,11 @@ turn means an empty judge input. The ordinary fallback can duplicate a
 side-effecting request at a second endpoint, while streaming has no fallback.
 No explicit timeout, retry budget, concurrency control, sensitivity policy, or
 route telemetry exists here.
+
+The result's model field is the configured local/remote label. When the remote
+endpoint is SGLang, its Ollama adapter ignores that requested label and runs
+the already served checkpoint, so `SmartRouter` can report a model name that
+did not execute the request.
 
 The classifier is vulnerable to ordinary heuristic failure: truncation,
 instruction influence from interpolated user text, and ambiguous output. Any

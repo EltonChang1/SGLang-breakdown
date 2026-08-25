@@ -236,6 +236,14 @@ shared disconnect check and scheduler abort path. There is no separate Ollama
 request ID in the wire records, so clients cannot issue a protocol-level abort
 or resume a returned `context` through this adapter.
 
+That shared path is weaker than an adapter-owned streaming cleanup guarantee.
+The Ollama generator creates neither the delayed abort task used by the native
+HTTP path nor a `finally` that aborts its native request when ASGI cancels body
+iteration. `TokenizerManager` can detect a disconnect while its iterator stays
+alive and reaches a wait timeout, but this snapshot has no focused test proving
+prompt scheduler cancellation when the streaming generator itself is closed
+([manager wait and disconnect checks](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/managers/tokenizer_manager.py#L1687-L1793)).
+
 ## Tags and show are synthetic metadata
 
 `get_tags` always returns exactly the one loaded `served_model_name`. Size is
@@ -299,6 +307,13 @@ propagates. The returned dictionary reports content, the model actually tried,
 the local/remote label, and either the classification/force reason or
 `"Fallback from ..."`
 ([call and fallback](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/ollama/smart_router.py#L170-L195)).
+
+Here “model tried” is the configured label sent in the Ollama request, not
+verified execution identity. On the remote SGLang destination, `/api/chat`
+ignores that label and executes the checkpoint already bound to
+`TokenizerManager`, while `SmartRouter` still reports `remote_model`. A
+mismatched router/server configuration can therefore attribute an answer to a
+model that did not execute it.
 
 ### Streaming is deliberately weaker
 

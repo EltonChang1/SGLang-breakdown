@@ -43,3 +43,7 @@ its exact status.
   Ollama package records, direct native handoff, NDJSON, synthetic model
   metadata, route overrides, client-side judging/fallback, docs, and the
   explicit absence of embedding and focused tests.
+- [Native gRPC Python bridge](native-grpc-python-bridge.md): shared runtime
+  protobuf, synchronous PyO3-to-async `RuntimeHandle`, typed and OpenAI
+  handoff, bounded-channel backpressure, abort/control behavior, multi-choice
+  tests, and precise Rust/legacy/gateway/encoder boundaries.

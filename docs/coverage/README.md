@@ -24,8 +24,8 @@ The initial inventory contains 8,319 unique tracked paths:
 | Asset | 4 |
 | Generated | 2 |
 
-After the Ollama API and Smart Router pass, 162 paths are `covered`, 37 are
-`partial`, 92 are justified `inventory-only`, and 8,028 remain `pending`.
+After the native gRPC Python bridge pass, 165 paths are `covered`, 41 are
+`partial`, 92 are justified `inventory-only`, and 8,021 remain `pending`.
 Small CLI, config-merging, argument-metadata, in-tree platform, offline-engine
 adapter, scoring, frontend IR/interpreter, tracing, choice-policy, SRT frontend
 HTTP adapter, provider backend/template/example, diffusion generate/launch/
@@ -38,7 +38,10 @@ and their focused test files, plus Anthropic Messages records/conversion/SSE/
 token counting, its user guide, focused unit test, live test mixin, tool suite,
 and manual VLM suite, plus the complete Ollama package, direct adapter, public
 tutorial, synthetic model metadata, and client-side Smart Router have complete
-references. Large shared schema,
+references. The shared native gRPC runtime protobuf, complete Python
+`RuntimeHandle`, and its focused multi-choice unit test are also covered; the
+Python-facing Rust extension, callback/channel, Tonic handler, and request-map
+slices are partial pending a full crate pass. Large shared schema,
 model-configuration, tokenizer, scheduler, result-processing, control, policy,
 worker, pipeline-request, chat, runtime, native-API documentation, and
 mixed-purpose test files remain partial; a link to one symbol must not be

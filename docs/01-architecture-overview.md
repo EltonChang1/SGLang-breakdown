@@ -237,6 +237,23 @@ one opposite-side fallback, and streams do not. See [Ollama-Compatible API and
 Smart Router](12-ollama-api-and-smart-router.md) for the exact schema/execution,
 streaming, metadata, cancellation, and routing boundaries.
 
+Native gRPC is another transport over the same tokenizer-manager runtime, but
+its concurrency boundary is different from FastAPI. `--grpc-port` loads an
+in-process Rust/Tonic extension beside HTTP. Tonic runs on its own thread and
+Tokio runtime; a synchronous PyO3 `RuntimeHandle` schedules native or existing
+OpenAI-adapter work onto the tokenizer-manager asyncio loop and pushes results
+back through bounded per-request channels. Rust owns stream-drop cancellation;
+Python owns SRT request construction, model-facing preparation, and runtime
+controls
+([assembly](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/http_server.py#L2729-L2764),
+[bridge](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/grpc_bridge.py#L60-L200)).
+This is distinct from `--smg-grpc-mode`'s external standalone server, the
+Rust model gateway's worker client, and the image-only EPD encoder protocol.
+See [Native gRPC and the Python Runtime
+Bridge](13-native-grpc-python-bridge.md) for the shared protobuf, typed/OpenAI
+flows, backpressure, terminal-choice, control, authentication, and test
+boundaries.
+
 Embedding, classification, score, and rerank adapters use a second shared
 runtime branch. Most construct `EmbeddingReqInput`, which performs prefill and
 pooling without autoregressive decode; CausalLM scoring and decoder-only

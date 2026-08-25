@@ -258,6 +258,37 @@ configured labels even though remote SGLang executes its one loaded model. See
 [Ollama-Compatible API and Smart
 Router](12-ollama-api-and-smart-router.md) for the full flow and test gaps.
 
+## Native gRPC Python bridge dependency boundary
+
+Native gRPC adds a Rust transport beside HTTP while preserving Python SRT
+runtime ownership:
+
+```text
+runtime protobuf -> Tonic handler -> Rust request map -> PyBridge channel
+                 -> synchronous RuntimeHandle call
+                 -> TokenizerManager asyncio loop -> shared SRT runtime
+native result dict -> PyO3 callback -> bounded Rust channel -> protobuf stream
+```
+
+| Component | Depends on | Supplies |
+| --- | --- | --- |
+| runtime protobuf | proto3 optional fields and oneof grammar constraints | 25 typed native, OpenAI JSON, and admin RPC contracts |
+| Rust/Tonic server | compiled protobuf, Tokio, optional Rust tokenizer | listener, per-RPC validation, response timeout, stream-drop abort, typed wire output |
+| `PyBridge` | PyO3 `RuntimeHandle`, bounded per-RID channels | short synchronous submissions, callbacks, ready edges, terminal errors |
+| `RuntimeHandle` | TokenizerManager event loop, template manager, OpenAI adapters | native request construction, async scheduling, result/control callbacks, JSON/SSE conversion |
+| typed native path | Rust protobuf-to-dict mapper and ordinary SRT request records | text/token generation, embedding/classification, routing/tracing/session/disaggregation controls |
+| OpenAI pass-through | raw JSON bytes and existing Python serving classes | validated full JSON or SSE-deframed payload chunks |
+| control path | tokenizer-manager local state and communicators | model/server information, health, cache/load/pause/profile/weight operations |
+
+`Ready` permits the producer to continue; `Pending` parks one Rust send and
+requires Python to wait for a cross-thread ready edge; `Closed` stops
+production. Rust owns response-stream drop cancellation and Python forwards it
+to the normal tokenizer-manager abort path. The native listener does not pass
+through HTTP authentication, so network reachability also exposes control
+RPCs. Legacy SMG serving, model-gateway worker gRPC, EPD encoder gRPC, and the
+experimental KV indexer use distinct owners or schemas. See [Native gRPC and
+the Python Runtime Bridge](13-native-grpc-python-bridge.md).
+
 ## OpenAI Responses dependency boundary
 
 Responses adds item normalization, local state, and two output protocols above

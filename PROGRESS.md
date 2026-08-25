@@ -32,7 +32,7 @@
 - Inventory: [`docs/coverage/inventory.csv`](docs/coverage/inventory.csv)
 - Policy and counts: [`docs/coverage/README.md`](docs/coverage/README.md)
 - Generator: [`scripts/build_coverage_inventory.py`](scripts/build_coverage_inventory.py)
-- Current statuses: 162 covered, 37 partial, 92 inventory-only, 8,028 pending.
+- Current statuses: 165 covered, 41 partial, 92 inventory-only, 8,021 pending.
 
 Every row includes a pinned source URL and category. Covered and partial rows
 link to their note. Inventory-only rows explain why line-by-line notes are not
@@ -40,94 +40,74 @@ useful. Pending rows state which future pass owns them.
 
 ## Completed in the latest run
 
-- Added [Anthropic-Compatible Messages API](docs/11-anthropic-messages.md) and
-  its [file reference](docs/reference/anthropic-messages.md). They trace both
-  routes through discriminated Anthropic records, ordered message conversion,
-  shared OpenAI chat preparation/native execution, full response shaping,
-  indexed content-block SSE, errors, usage, and preparation-only token count.
-- Explained template-probed inline system placement; base64/URL media;
-  structured search and tool-result flattening; deferred tool references;
-  user/tool/user ordering; native versus marker-wrapped thinking history; and
-  empty assistant-turn preservation.
-- Covered sampling and stop inputs, reasoning toggles and effort, custom tool
-  schemas and auto/required/named selection, built-in-tool filtering,
-  non-stream thinking/text/tool output, adjacent tool block separation,
-  last-payload finish chunks, balanced stream failures, and disconnect abort
-  ownership.
-- Completed all three Anthropic runtime-package rows, the user guide, focused
-  unit suite, reusable live test mixin, registered tool-use suite, and manual
-  VLM suite. Added a partial boundary for the inline-system template detector
-  and refreshed shared HTTP server, OpenAI chat, and broad server-test rows.
-- Recorded exact compatibility gaps: metadata and tool-result `is_error` are
-  lost; built-in Anthropic tools are accepted but skipped; thinking budget,
-  display omission, adaptive mode, task budget, and betas are only partially
-  honored; signatures, pings, cache-creation usage, and matched stop sequences
-  are not emitted; token count omits `output_config` and does not run
-  multimodal media expansion.
-- Added [Ollama-Compatible API and Smart
-  Router](docs/12-ollama-api-and-smart-router.md) and its [file
-  reference](docs/reference/ollama-api-and-smart-router.md). They trace direct
-  chat-template-ID and prompt-text conversion into native generation, the
-  eight-option sampling map, full responses, NDJSON streams, synthetic model
-  metadata, route environment variables, and the separate client utility.
-- Covered every dedicated Ollama runtime and documentation file. Explained
-  that request-side model names, images, format, thinking, template, suffix,
-  context, keep-alive, and raw mode are accepted but do not affect execution,
-  and confirmed that the snapshot exposes no Ollama embedding route.
-- Recorded the cumulative-stream invariant, incremental-output corruption,
-  possible terminal-delta loss, hard-coded finish reasons, absent stream
-  metrics/errors, permissive `/api/show`, fixed `/api/tags` metadata, and the
-  difference between the default SGLang root and an overridden Ollama root.
-- Traced `SmartRouter` classification, prompt truncation and trust boundary,
-  force precedence, last-user-message selection, one-shot non-stream fallback,
-  no streaming fallback, and the interactive history/error loop.
-- Updated architecture/study navigation, the dependency and terminology maps,
-  indexes, coverage policy/counts, inventory, and shared-file references.
+- Added [Native gRPC and the Python Runtime
+  Bridge](docs/13-native-grpc-python-bridge.md) and its [file
+  reference](docs/reference/native-grpc-python-bridge.md).
+- Separated native in-process gRPC, legacy external SMG serving, the Rust model
+  gateway worker client/router, image-only EPD encoder gRPC, and the
+  experimental KV indexer so their launch modes and schemas are not conflated.
+- Completed the 25-RPC shared runtime protobuf and all 816 lines of Python
+  `RuntimeHandle`: synchronous PyO3 entry, tokenizer-loop scheduling, native
+  generate/embed handoff, choice-aware terminal detection, bounded-channel
+  ready/pending/closed behavior, backpressure timeout, abort, information and
+  control operations, OpenAI request validation, response serialization, and
+  SSE deframing.
+- Explained the Rust-facing contract without claiming the crate complete:
+  listener/thread/Tokio startup, per-RID channels, one parked send, lost-wakeup
+  defense, stream-drop abort guard, exception/status mapping, protobuf-to-SRT
+  dictionaries, metadata JSON strings, and unauthenticated admin exposure.
+- Completed the focused Python test file and recorded its narrow guarantee:
+  every non-streaming choice is emitted and the first finished streaming
+  choice does not terminate `n > 1`. Backpressure, cancellation, OpenAI,
+  embedding, controls, PyO3, Tonic, and live runtime behavior remain untested.
+- Recorded source-visible gaps: unary embedding does not explicitly close its
+  generator or honor callback status; SSE parsing has no partial-line carry;
+  invalid UTF-8 is a server error instead of BadRequest; structured unary
+  control errors are discarded by Rust error precedence; current Rust callers
+  do not use the request-shim disconnect hook; callback exceptions can defer
+  cleanup to the response timeout; and bind/network policy is the security
+  boundary.
+- Refreshed the architecture overview, ordered study path, README, reference
+  index, dependency map, glossary, coverage policy/counts, inventory, progress
+  ledger, and required [final report](FINAL-REPORT.md).
 
 ## Validation in the latest run
 
-- Verified `.source/sglang` is clean and exactly at
+- Verified `.source/sglang` was clean and exactly at
   `f464e77d17a3908ad0ea32547b1e8b039bcbd354` before analysis; the final audit
   repeats this check before commit.
-- Regenerated the 8,319-row inventory and passed the generator's `--check`;
-  status counts are 162 covered, 37 partial, 92 inventory-only, and 8,028
-  pending.
-- Audited all 32 study Markdown files: 177 local links/images, 1,350 pinned
-  source links and line ranges, and all 199 covered/partial ledger note targets
-  resolve with no errors.
-- AST-parsed all four dedicated Ollama modules plus the shared HTTP server and
-  checked 34 named records, classes, methods, functions, and routes, plus all
-  five route environment keys. An isolated import/default assertion pass for
-  the protocol records also succeeded.
-- Attempted the focused CPU Anthropic unit suite directly. Import stopped at
-  missing `orjson` before test discovery, so no test cases ran. The broad,
-  tool-use, and manual VLM suites were not run because they launch model
-  servers; VLM also downloads external fixtures.
-- The snapshot has no dedicated Ollama schema, handler, route, or smart-router
-  tests. A first isolated handler import stopped at missing `orjson`; retrying
-  with only its serializer stubbed exercised the real adapter code and verified
-  option/chat conversion, empty generation, terminal and incremental stream
-  gaps, and synthetic metadata. A fake Ollama client verified judge truncation,
-  force precedence, fallback, and raw streaming. No live CLI/model validation
-  or ASGI disconnect test was available.
-- The inventory check and `git diff --check` passed. No GPU/model server was
-  available for live integration validation.
+- Regenerated the 8,319-row inventory. Status counts are 165 covered, 41
+  partial, 92 inventory-only, and 8,021 pending.
+- AST/symbol, Markdown link/range, ledger-note, inventory `--check`, whitespace,
+  and final source/repository-state results are recorded in `FINAL-REPORT.md`.
+- The first test invocation used a non-package unittest module name and failed
+  before import. Retrying the file directly reached the source package but
+  stopped at missing `orjson`; neither focused test ran. No Rust build, Tonic
+  client, live model server, or GPU test was available.
 
 ## Next coherent study unit
 
-Continue Phase 3 by mapping the distinct gRPC boundaries before assigning
-coverage: Python's native bridge/sidecar and legacy SMG server, the shared
-runtime proto and Rust extension, the model gateway's gRPC router, and the
-separate image-only EPD encoder transport. Complete the Python request bridge
-and its focused unit test first without treating the larger Rust/gateway and
-encoder subsystems as one adapter. Then cover parser and session subunits.
+Continue Phase 3 with the complete native Rust gRPC crate: build/package
+integration, tokenizer fallback, all Tonic RPC handlers, response and request
+utilities, embedded Rust tests, Python extension tests, and a live client
+matrix. Then treat the legacy SMG server, model gateway gRPC router, and EPD
+encoder transport as separate guides before moving to parser and session
+subunits.
 
 ## Known gaps
 
 - Phase 1 public surfaces plus native generation, OpenAI completion/chat/
   embedding/classify/score/rerank/tokenize/Responses, Anthropic Messages, and
-  Ollama Phase 3 subunits are complete at their generic adapter boundaries.
-  gRPC and the remaining protocol adapters are the next gaps.
+  Ollama and Python native-gRPC Phase 3 subunits are complete at their recorded
+  adapter boundaries. The native Rust crate, legacy SMG, model gateway, EPD
+  encoder, and remaining protocol adapters are the next gaps.
+- Native gRPC's Rust crate remains partial outside its Python-facing slices.
+  Legacy `grpc_server.py`, managed sidecar, model-gateway gRPC tree, encoder
+  gRPC, experimental KV-indexer protocol, build/packaging, and Rust/Python/live
+  integration tests remain pending. The current listener is unauthenticated;
+  Python embedding cleanup/status, fragmented SSE, invalid UTF-8, structured
+  control errors, disconnect-hook plumbing, and callback-failure cleanup need
+  regression tests or fixes.
 - Ollama does not enforce request model selection; prepare message/generate
   images; implement format/thinking/template/suffix/context/keep-alive/raw
   semantics; expose embedding; translate native finish/error/usage details;

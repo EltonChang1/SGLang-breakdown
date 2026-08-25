@@ -121,6 +121,21 @@ carried by `PortArgs`; local mode primarily uses `ipc://` files, while some
 distributed modes derive TCP addresses
 ([`PortArgs`](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/server_args.py#L10551-L10635)).
 
+**Native gRPC (SRT).** The optional Rust/Tonic endpoint enabled by
+`--grpc-port` or `SGLANG_GRPC_PORT` beside the ordinary Python HTTP server. It
+compiles the in-tree runtime protobuf, calls the same tokenizer manager through
+`RuntimeHandle`, and exposes both inference and control RPCs. It is distinct
+from legacy `--smg-grpc-mode`, model-gateway worker gRPC, and encoder EPD gRPC
+([assembly](https://github.com/EltonChang1/sglang/blob/f464e77d17a3908ad0ea32547b1e8b039bcbd354/python/sglang/srt/entrypoints/http_server.py#L2729-L2764)).
+
+**RuntimeHandle (native gRPC).** The synchronous Python object called by the
+PyO3 bridge. It converts Rust-built dictionaries or OpenAI JSON to ordinary SRT
+request objects, schedules async work on the tokenizer-manager loop, and
+returns chunks through callbacks with bounded-channel backpressure. It is not
+the frontend-language `Runtime`, a scheduler process, or an ASGI request
+handler. See [Native gRPC and the Python Runtime
+Bridge](13-native-grpc-python-bridge.md).
+
 **Harmony.** GPT-OSS's role/channel/recipient message and token protocol. The
 Responses adapter uses it instead of an SRT chat template for GPT-OSS, parses
 analysis/final/tool recipients from output token IDs, and can rerender the

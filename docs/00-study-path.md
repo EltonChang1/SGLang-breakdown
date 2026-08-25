@@ -137,6 +137,16 @@ tags/show metadata, import-time route overrides, missing embedding surface,
 streaming correctness gaps, and the Smart Router's judge, force, fallback, and
 interactive-demo behavior.
 
+[Native gRPC and the Python Runtime
+Bridge](13-native-grpc-python-bridge.md), with its [file
+reference](reference/native-grpc-python-bridge.md), next separates the native
+in-process endpoint from legacy SMG serving, the model gateway, encoder EPD,
+and experimental KV-indexer protocols. It completes the shared runtime schema,
+Python `RuntimeHandle`, and focused multi-choice test; traces PyO3 into the
+tokenizer-manager event loop; and explains channel backpressure, choice-aware
+completion, abort ownership, OpenAI SSE deframing, controls, unauthenticated
+operations, and exact remaining Rust/integration gaps.
+
 Questions to answer before continuing:
 
 - Why does `n > 1` become multiple independent request IDs rather than one
@@ -187,6 +197,16 @@ Questions to answer before continuing:
   checkpoint's context length, and why is `/api/tags` not a model store?
 - Why does Smart Router full-response fallback not imply streaming fallback,
   and why must its judge not be treated as a policy enforcement boundary?
+- Why does `--grpc-port` start a Rust endpoint beside HTTP while
+  `--smg-grpc-mode` selects a different standalone server?
+- Which thread/loop owns Tonic I/O, callback backpressure, and tokenizer-manager
+  work, and how does a Rust ready edge safely wake Python asyncio?
+- Why can a native request with `stream=false` still produce multiple protobuf
+  response messages, and which identifiers close an `n > 1` stream?
+- Which SSE fields and sentinels disappear in OpenAI gRPC `json_chunk`, and
+  what happens if the body iterator splits one `data:` line across chunks?
+- Why is the native gRPC listener's bind/network policy the security boundary
+  for inference and admin RPCs?
 
 ## Phase 4: scheduling and cache ownership
 
